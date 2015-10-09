@@ -104,7 +104,7 @@ for i in $num_mon; do
             > "$PANEL_FIFO$i" &
     volume_status.sh &
     #print conkyinfos on first panel only to avoid processes
-    conky -c ~/.config/bspwm/panel/conkyrc > "$PANEL_FIFO$(bspc query -M | awk NR==1)" &
+    run_once conky -c ~/.config/bspwm/panel/conkyrc > "$PANEL_FIFO$(bspc query -M | awk NR==1)" &
     xtitle -t 80 -sf 'T\\X%s//' > "$PANEL_FIFO$i" &
     #title.sh $i > "$PANEL_FIFO$i" &
 
