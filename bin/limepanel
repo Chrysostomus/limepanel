@@ -1,0 +1,108 @@
+#! /bin/sh
+#panel script for bspwm using i3 style workspace indicator
+
+#set height and font if unset 
+ 
+PANEL_FIFO="$HOME/.config/bspwm/panfifo"
+[[  $PANEL_HEIGHT && ${PANEL_HEIGHT-x} ]] && panel_height=$PANEL_HEIGHT || panel_height='25'
+[[  $PANEL_FONT_FAMILY && ${PANEL_FONT_FAMILY-x} ]] && mainfont=$PANEL_FONT_FAMILY || mainfont='-zevv-*-*-*-*-*-20-*-*-*-*-*-*-*'
+ 
+# From panel_colors file
+ 
+COLOR_FOCUSED_DESKTOP_FG="F#FF99CC99"
+COLOR_FOCUSED_DESKTOP_BG="F#FF000000"
+COLOR_DESKTOP_FG='#FFF6F9FF'
+COLOR_DESKTOP_BG="F#FF000000"
+ 
+# Kill any panel processes older than us, instead of bailing like the example
+# does.
+ 
+while [ $(pgrep -cx panel) -gt 1 ] ; do
+	pkill -ox -9 panel
+done
+ 
+# Kill any remaining trays / xtitle instances so we don't have multiples.
+ 
+killall -9 stalonetray
+killall -9 xtitle
+killall -9 conky
+# Setup taken from example, tell bspwm to avoid our status/tray and to start
+# sending status updates to a FIFO
+ 
+trap 'trap - TERM; kill 0' INT TERM QUIT EXIT
+ 
+[ -e "$PANEL_FIFO" ] && rm "$PANEL_FIFO"
+mkfifo "$PANEL_FIFO"
+ 
+bspc config top_padding $PANEL_HEIGHT
+bspc control --subscribe > "$PANEL_FIFO" &
+# Title
+xtitle -sf 'T%s' > "$PANEL_FIFO" &
+conky -c ~/.config/bspwm/panel/conkyrc > "$PANEL_FIFO" &
+volume_status.sh &
+ 
+# - functionified, from panel_bar file of example
+# - the output changes based on the number of monitors, to place a single
+# monitors's information on that same monitor, instead of all in one corner.
+# - added B header for battery
+# - all the desktop indicators are enumerated
+ 
+logo="%{A:dmainmenu.sh &disown:}  %{A}"
+
+num_mon=$(bspc query -M | wc -l)
+
+# rootcomas panel_bar
+
+function panel_bar {
+ while read -r line ; do
+    case $line in
+        S*)
+            time="${line#?}" #http://wiki.bash-hackers.org/syntax/pe#substring_removal
+            ;;
+        T*)
+            title="${line#?}"
+            ;;
+	L*)
+	    layout="${name}"
+	    ;;
+	C*)
+            conky_infos="%{F#FF99CC99}${line#?}"
+            ;;
+	V*)
+            volume_infos="${RA}%{F#FF99CC99} ${line#?} "
+            ;;    	    
+        W*)
+            # bspwm internal state
+            desktops=""
+            IFS=':'
+            set -- ${line#?}
+            while [ $# -gt 0 ] ; do
+                item=$1
+                name=${item#?}
+                case $item in
+                    # always show focused desktops
+                    O*|F*|U*)
+                        desktops="${desktops}%{F$COLOR_FOCUSED_DESKTOP_FG}%{B$COLOR_FOCUSED_DESKTOP_BG} ${name} %{B-}%{F-}"
+                        ;;
+                    # show used unfocused (hide free unused)
+                    o*|u*)#f*
+                        desktops="${desktops}%{F$COLOR_DESKTOP_FG}%{B$COLOR_DESKTOP_BG}%{A:bspc desktop -f ${name}:} ${name} %{A}%{B-}%{F-}"
+                        ;;
+                esac
+                shift
+            done
+            ;;
+    esac
+    printf "%s\n" "%{l}${logo}${desktops} ${layout}%{F#FFF6F9FF}%{c}${title}%{r}$volume_infos ${conky_infos} "
+ done
+}
+
+# Actually invoking the panel and piping to bar
+ 
+cat $PANEL_FIFO | panel_bar | lemonbar -g x$panel_height -f $mainfont -o -3 -f "-*-ionicons-medium-r-normal-*-25-*-*-*-p-*-*-1" -F '#FF99CC99' -B '#FF000000' | sh &
+ 
+ # rootcomas panel pipe 
+#cat $PANEL_FIFO | ./panel_bar | lemonbar -g x$panel_height -F "$COLOR_FOREGROUND" -B "$COLOR_BACKGROUND" -f "$PANEL_FONT_FAMILY" | while read -r line; do $line; done
+
+
+wait
