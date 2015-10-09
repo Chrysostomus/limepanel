@@ -2,8 +2,6 @@
 #panel script for bspwm using i3 style workspace indicator
 
 #set height and font if unset 
- 
-PANEL_FIFO="$HOME/.config/bspwm/panfifo"
 [[  $PANEL_HEIGHT && ${PANEL_HEIGHT-x} ]] && panel_height=$PANEL_HEIGHT || panel_height='25'
 [[  $PANEL_FONT_FAMILY && ${PANEL_FONT_FAMILY-x} ]] && mainfont=$PANEL_FONT_FAMILY || mainfont='-zevv-*-*-*-*-*-20-*-*-*-*-*-*-*'
  
@@ -53,7 +51,7 @@ num_mon=$(bspc query -M | wc -l)
 
 # rootcomas panel_bar
 
-function panel_bar {
+function lime {
  while read -r line ; do
     case $line in
         S*)
@@ -99,35 +97,14 @@ function panel_bar {
 
 # Actually invoking the panel and piping to bar
  
-cat $PANEL_FIFO | panel_bar | lemonbar -g x$panel_height -f $mainfont -o -3 -f "-*-ionicons-medium-r-normal-*-25-*-*-*-p-*-*-1" -F '#FF99CC99' -B '#FF000000' | sh &
+cat $PANEL_FIFO | lime | lemonbar -g x$panel_height -f $mainfont -o -3 -f "-*-ionicons-medium-r-normal-*-25-*-*-*-p-*-*-1" -F '#FF99CC99' -B '#FF000000' | sh &
  
- # rootcomas panel pipe 
-#cat $PANEL_FIFO | ./panel_bar | lemonbar -g x$panel_height -F "$COLOR_FOREGROUND" -B "$COLOR_BACKGROUND" -f "$PANEL_FONT_FAMILY" | while read -r line; do $line; done
-
 
 wait
 
 ##Neeasades panel per monitor stuff
 # Get the number of monitors we will be making bars for
 num_mon=$(bspc query -M)
-[ "$HOSTNAME" = "littleapple" ] && num_mon="2 1 3"
-
-# panel_gap to 0 if no gaps.
-[ "$BSPWM_GAPS" = false ] && PANEL_GAP=0
-
-# display function used by both info.sh and panel_bar scripts:
-declare -f block
-if [ $? = "1" ]; then
-    function block() {
-        [ ! -z $NoPadding ] && pPadding=$NoPadding
-        if [ "$blockActive" = true ] ; then
-            echo -n "%{B$pBGActiveTab}%{F$pBG}$(printf %${pPadding}s)$@$(printf %${pPadding}s)%{B$pBG} "
-        else
-            echo -n "%{B$pBGInactiveTab}%{F$pFG}$(printf %${pPadding}s)$@$(printf %${pPadding}s)%{B$pBG} "
-        fi
-    }
-    export -f block
-fi
 
 for i in $num_mon; do
     # remove any open panel fifo, and then create one
@@ -146,16 +123,8 @@ for i in $num_mon; do
     # in a more natural manner, but can be a little more processor intensive.
     # Substitute the xtitle command here if you just want the current active window
     # name to be displayed.
-    #xtitle -t 80 -sf 'T\\X%s//' > "$PANEL_FIFO$i" &
-    title.sh $i > "$PANEL_FIFO$i" &
-
-    # info.sh outputs system information.
-    if [ -z "$(eval echo \$'barInfo'$i)" ]; then
-        info.sh $barInfo > "$PANEL_FIFO$i" &
-    else
-        #Custom bar options per monitor. (defined barInfo$i var for this monitor)
-        info.sh $(eval echo \$'barInfo'$i) > "$PANEL_FIFO$i" &
-    fi
+    xtitle -t 80 -sf 'T\\X%s//' > "$PANEL_FIFO$i" &
+    #title.sh $i > "$PANEL_FIFO$i" &
 
 
     # Grep for current monitor width (will be first number regex match from bspc query command below).
@@ -163,11 +132,7 @@ for i in $num_mon; do
 
     # The nested expr statements account for gap settings and current offset.
     # PANEL_GAP value is set in profile.
-    cat "$PANEL_FIFO$i" | panel_bar |\
-        lemonbar -g $(expr $CUR_MON_WIDTH - $(expr $PANEL_GAP + $PANEL_GAP))x$PANEL_HEIGHT+$(expr $CUR_X_OFFSET + $PANEL_GAP)+$PANEL_GAP -f "$PANEL_FONT_MAIN" -f "$PANEL_FONT_ICON" -f "font\-linux-10" -u $PANEL_UNDERLINE | sh &
-
-    # Increment the x offset for the next monitor.
-    CUR_X_OFFSET=$(expr $CUR_X_OFFSET + $CUR_MON_WIDTH )
+    cat $PANEL_FIFO$1 | lime | lemonbar -g x$panel_height -f $mainfont -o -3 -f "-*-ionicons-medium-r-normal-*-25-*-*-*-p-*-*-1" -F '#FF99CC99' -B '#FF000000' | sh &
 done
 
 wait
