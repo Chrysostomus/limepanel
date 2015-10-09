@@ -17,35 +17,22 @@ COLOR_DESKTOP_BG="F#FF000000"
  
 while [ $(pgrep -cx panel) -gt 1 ] ; do
 	pkill -ox -9 panel
+        killall -9 stalonetray
+        killall -9 xtitle
+        killall -9 conky
 done
  
-# Kill any remaining trays / xtitle instances so we don't have multiples.
- 
-killall -9 stalonetray
-killall -9 xtitle
-killall -9 conky
-# Setup taken from example, tell bspwm to avoid our status/tray and to start
 # sending status updates to a FIFO
  
 trap 'trap - TERM; kill 0' INT TERM QUIT EXIT
- 
-[ -e "$PANEL_FIFO" ] && rm "$PANEL_FIFO"
-mkfifo "$PANEL_FIFO"
- 
-bspc config top_padding $PANEL_HEIGHT
-bspc control --subscribe > "$PANEL_FIFO" &
-# Title
-xtitle -sf 'T%s' > "$PANEL_FIFO" &
-conky -c ~/.config/bspwm/panel/conkyrc > "$PANEL_FIFO" &
-volume_status.sh &
- 
+
 # - functionified, from panel_bar file of example
 # - the output changes based on the number of monitors, to place a single
 # monitors's information on that same monitor, instead of all in one corner.
 # - added B header for battery
 # - all the desktop indicators are enumerated
  
-logo="%{A:dmainmenu.sh &disown:}  %{A}"
+logo="%{A:limemenu &disown:}  %{A}"
 
 num_mon=$(bspc query -M | wc -l)
 
@@ -111,24 +98,15 @@ for i in $num_mon; do
     [ -e "$PANEL_FIFO$i" ] && rm "$PANEL_FIFO$i"
     mkfifo "$PANEL_FIFO$i"
 
-    # This greps out the bspc control section of the current monitor we are on.
-    # The while loop in the middle appends 'W' to the start because the panel_bar
-    # script assumes input from a 'regular' bspc control --subscribe command
     bspc control --subscribe |\
         grep -oE "[Mm]$i[^TM]*[TML]" --line-buffered |\
         while read line; do echo W$line; done \
             > "$PANEL_FIFO$i" &
-
-    # title.sh allows for a tabbing feature like in i3, and handles multihead titles
-    # in a more natural manner, but can be a little more processor intensive.
-    # Substitute the xtitle command here if you just want the current active window
-    # name to be displayed.
+    volume_status.sh &
+    #print conkyinfos on first panel only to avoid processes
+    conky -c ~/.config/bspwm/panel/conkyrc > "$PANEL_FIFO$(bspc query -M | awk NR==1)" &
     xtitle -t 80 -sf 'T\\X%s//' > "$PANEL_FIFO$i" &
     #title.sh $i > "$PANEL_FIFO$i" &
-
-
-    # Grep for current monitor width (will be first number regex match from bspc query command below).
-    CUR_MON_WIDTH=$(bspc query -T -m $i | grep -oE "[0-9]{2,6}" | head -n 1)
 
     # The nested expr statements account for gap settings and current offset.
     # PANEL_GAP value is set in profile.
