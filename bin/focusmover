@@ -1,9 +1,13 @@
 #!/bin/bash
+#Focus windows by direction, works with multihead
+#called like this in sxhkdrc:
+#super +  {a,s,w,d}
+#   focusmover {left,down,up,right} 
     bspc config pointer_follows_monitor true; \
     bspc config pointer_follows_focus true; \
     dir=$@; \
-    if ! bspc window -f $dir; then \
-        bspc monitor -f $dir; \
+        if ! bspc window -f $dir; then \
+    bspc monitor -f $dir; \
     fi; \
     bspc config pointer_follows_monitor false; \
     bspc config pointer_follows_focus false
