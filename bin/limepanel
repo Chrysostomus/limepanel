@@ -37,7 +37,9 @@ logo="%{A:limemenu &disown:}  %{A}"
 num_mon=$(bspc query -M | wc -l)
 
 # rootcomas panel_bar
-
+function run_once {
+	pgrep $@ > /dev/null || ($@ &)
+}
 function lime {
  while read -r line ; do
     case $line in
