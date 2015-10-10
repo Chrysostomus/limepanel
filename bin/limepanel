@@ -1,7 +1,5 @@
-
 #! /bin/sh
 #panel script for bspwm using i3 style workspace indicator
-# codezen panel
 
 #set height and font if unset 
  
@@ -9,28 +7,30 @@ PANEL_FIFO="$HOME/.config/bspwm/panfifo"
 [[  $PANEL_HEIGHT && ${PANEL_HEIGHT-x} ]] && panel_height=$PANEL_HEIGHT || panel_height='25'
 [[  $PANEL_FONT_FAMILY && ${PANEL_FONT_FAMILY-x} ]] && mainfont=$PANEL_FONT_FAMILY || mainfont='-zevv-*-*-*-*-*-20-*-*-*-*-*-*-*'
  
-# From panel_colors file 
+# Colors
 COLOR_FOCUSED_DESKTOP_FG="#FF99CC99"
 COLOR_FOCUSED_DESKTOP_BG="#FF000000"
 COLOR_DESKTOP_FG='#FFF6F9FF'
-COLOR_DESKTOP_BG="#FF000000"
- 
- 
+COLOR_DESKTOP_BG="#FF000000" 
+# menu button
 logo="%{A:dmainmenu.sh &disown:}  %{A}"
 # Kill any panel processes older than us, instead of bailing like the example
 # does. That caused one too many panel-less boots for me.
  
-while [ $(pgrep -cx panel) -gt 1 ] ; do
-	pkill -ox -9 panel
+while [ $(pgrep -cx limepanel) -gt 1 ] ; do
+	pkill -ox -9 limepanel
+        killall -9 stalonetray
+        killall -9 xtitle
+        killall -9 conky
 done
- 
-# Kill any remaining trays / xtitle instances so we don't have multiples.
- 
-killall -9 stalonetray
-killall -9 xtitle
-killall -9 conky
-# Setup taken from example, tell bspwm to avoid our status/tray and to start
-# sending status updates to a FIFO
+
+if [ $(pgrep -cx lemonbar) -gt 1 ] ; then
+	printf "%s\n" "The panel is already running."
+    while [[ $(pgrep -c "lemonbar") != 0 ]]
+    do
+        pkill -n -9 "lemonbar"
+    done
+fi
  
 trap 'trap - TERM; kill 0' INT TERM QUIT EXIT
  
