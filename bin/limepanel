@@ -1,3 +1,4 @@
+
 #! /bin/sh
 #panel script for bspwm using i3 style workspace indicator
 
@@ -6,24 +7,28 @@
 PANEL_FIFO="$HOME/.config/bspwm/panfifo"
 [[  $PANEL_HEIGHT && ${PANEL_HEIGHT-x} ]] && panel_height=$PANEL_HEIGHT || panel_height='25'
 [[  $PANEL_FONT_FAMILY && ${PANEL_FONT_FAMILY-x} ]] && mainfont=$PANEL_FONT_FAMILY || mainfont='-zevv-*-*-*-*-*-20-*-*-*-*-*-*-*'
+[[  $FONT_FAMILY3 && ${FONT_FAMILY3-x} ]] && iconfont=$FONT_FAMILY3 || iconfont="-*-ionicons-medium-r-normal-*-25-*-*-*-p-*-*-1"
+#Set height if unset
+[[  $PANEL_HEIGHT && ${PANEL_HEIGHT-x} ]] && panel_height=$PANEL_HEIGHT || panel_height=25
  
-# Colors
+# From panel_colors file 
 COLOR_FOCUSED_DESKTOP_FG="#FF99CC99"
 COLOR_FOCUSED_DESKTOP_BG="#FF000000"
 COLOR_DESKTOP_FG='#FFF6F9FF'
-COLOR_DESKTOP_BG="#FF000000" 
-# menu button
+COLOR_DESKTOP_BG="#FF000000"
+ 
+ 
 logo="%{A:dmainmenu.sh &disown:}  %{A}"
 # Kill any panel processes older than us, instead of bailing like the example
 # does. That caused one too many panel-less boots for me.
  
 while [ $(pgrep -cx limepanel) -gt 1 ] ; do
 	pkill -ox -9 limepanel
-        killall -9 stalonetray
-        killall -9 xtitle
-        killall -9 conky
+	pkill -ox -9 lemonbar
+	killall -9 stalonetray
+	killall -9 xtitle
+	killall -9 conky
 done
-
 if [ $(pgrep -cx lemonbar) -gt 1 ] ; then
 	printf "%s\n" "The panel is already running."
     while [[ $(pgrep -c "lemonbar") != 0 ]]
@@ -31,13 +36,13 @@ if [ $(pgrep -cx lemonbar) -gt 1 ] ; then
         pkill -n -9 "lemonbar"
     done
 fi
- 
+
 trap 'trap - TERM; kill 0' INT TERM QUIT EXIT
  
 [ -e "$PANEL_FIFO" ] && rm "$PANEL_FIFO"
 mkfifo "$PANEL_FIFO"
  
-bspc config top_padding $PANEL_HEIGHT
+bspc config top_padding $(($PANEL_HEIGHT-$gap))
 bspc control --subscribe > "$PANEL_FIFO" &
 # Title
 xtitle -sf 'T%s' > "$PANEL_FIFO" &
@@ -89,6 +94,13 @@ function lime {
 
 # Actually invoking the panel and piping to bar
  
-cat $PANEL_FIFO | lime | lemonbar -g x$panel_height -f "-zevv-*-*-*-*-*-20-*-*-*-*-*-*-*" -o -1 -f "-*-ionicons-medium-r-normal-*-25-*-*-*-p-*-*-1" -o 0 -F '#FF99CC99' -B '#FF000000' | sh &
- 
+cat $PANEL_FIFO \
+	| lime \
+	| lemonbar \
+	-g x$panel_height \
+	-f "$mainfont" -o -1 \
+	-f "$iconfont" -o 0 \
+	-F '#FF99CC99' \
+	-B '#FF000000' \
+	| sh &
 wait
