@@ -1,17 +1,19 @@
 
+# Maintainer: Bernhard Landauer <oberon@manjaro.org>
 # Maintainer: Chrysostomus
 
 pkgname=limepanel
-_ver=0.1
-pkgver=0.1.r64.91e6036
+_ver=0.7
+pkgver=0.7.r79.db71adb
 pkgrel=1
-pkgdesc="i3 style panelfor bspwm using patched dmenu and lemonbar"
+pkgdesc="Panel script for bspwm using patched dmenu and lemonbar"
 arch=any
 url=https://github.com/Chrysostomus/limepanel
 license=MIT
 depends=('dmenu-manjaro'
-	'lemonbar'
+	'lemonbar-xft-clicky'
 	'xdotool'
+	'pulseaudio-ctl'
 	'rxvt-unicode'
 	'networkmanager-dmenu'
 	'conky-cli'
@@ -22,7 +24,7 @@ depends=('dmenu-manjaro'
 	'zenity'
 	'xdg-utils')
 makedepends=git
-source="git://github.com/Chrysostomus/lemonpanel"
+source="git://github.com/Chrysostomus/limepanel"
 md5sums=('SKIP')
 
 pkgver() {
@@ -31,8 +33,8 @@ pkgver() {
 }
 
 package () {
-	cd $srcdir
-	install -Dm755 $srcdir/$pkgname/lemonpanel $pkgdir/usr/bin/lemonpanel
-	cp -r $srcdir/$pkgname/bin $pkgdir/usr
+	cd $srcdir/$pkgname
+	install -dm755 $pkgdir/usr
+	cp -r bin $pkgdir/usr
 	chmod a+x $pkgdir/usr/bin/*
 }
