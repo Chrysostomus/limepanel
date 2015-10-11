@@ -1,5 +1,4 @@
-
-#! /bin/sh
+#! /bin/bash
 #panel script for bspwm using i3 style workspace indicator
 
 #set height and font if unset 
@@ -16,7 +15,13 @@ COLOR_FOCUSED_DESKTOP_FG="#FF99CC99"
 COLOR_FOCUSED_DESKTOP_BG="#FF000000"
 COLOR_DESKTOP_FG='#FFF6F9FF'
 COLOR_DESKTOP_BG="#FF000000"
- 
+
+function conkywrap {
+	bat=$(ls /sys/class/power_supply | grep --color=never 'BAT*')
+	interface=$(awk 'NR>1{print $6}' < /proc/net/arp)
+	sed -i 's/BAT1/'$bat'/g' $HOME/.config/bspwm/panel/conkyrc &
+	sed -i 's/wlp1s0/'$interface'/g' $HOME/.config/bspwm/panel/conkyrc &
+}
  
 logo="%{A:dmainmenu.sh &disown:}  %{A}"
 # Kill any panel processes older than us, instead of bailing like the example
@@ -38,15 +43,16 @@ if [ $(pgrep -cx lemonbar) -gt 1 ] ; then
 fi
 
 trap 'trap - TERM; kill 0' INT TERM QUIT EXIT
- 
+
+#Collect info to PANEL_FIFO  
 [ -e "$PANEL_FIFO" ] && rm "$PANEL_FIFO"
 mkfifo "$PANEL_FIFO"
- 
+
 bspc config top_padding $(($PANEL_HEIGHT-$gap))
 bspc control --subscribe > "$PANEL_FIFO" &
 # Title
 xtitle -sf 'T%s' > "$PANEL_FIFO" &
-conky -c ~/.config/bspwm/panel/conkyrc > "$PANEL_FIFO" &
+conkywrap && conky -c ~/.config/bspwm/panel/conkyrc > "$PANEL_FIFO" &
 volume_status.sh &
  
 
