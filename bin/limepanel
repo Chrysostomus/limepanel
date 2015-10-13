@@ -123,7 +123,8 @@ cat $PANEL_FIFO \
 	-g x$panel_height \
 	-f "$mainfont" -o -1 \
 	-f "$iconfont" -o 0 \
+	-o -3 -f 'dejavu sans mono for Powerline :size=12 :style=regular' \
 	-F '#FF99CC99' \
 	-B '#FF000000' \
-	| sh &
+	| while read line; do eval "$line"; done &
 wait
