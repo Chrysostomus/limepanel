@@ -69,7 +69,8 @@ bspc config top_padding $(($PANEL_HEIGHT-$gap))
 bspc control --subscribe > "$PANEL_FIFO" &
 # Title
 xtitle -sf 'T%s' > "$PANEL_FIFO" &
-conkywrap && conky -c ~/.config/bspwm/panel/conkyrc > "$PANEL_FIFO" &
+#conkywrap && \
+conky -c ~/.config/bspwm/panel/conkyrc > "$PANEL_FIFO" &
 volume_status.sh &
  
 
