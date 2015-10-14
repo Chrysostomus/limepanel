@@ -22,7 +22,8 @@ depends=('dmenu-manjaro'
 	'bdf-zevv-peep'
 	'ttf-ionicons'
 	'zenity'
-	'xdg-utils')
+	'xdg-utils'
+	'pmenu')
 makedepends=git
 source="git://github.com/Chrysostomus/limepanel"
 md5sums=('SKIP')
