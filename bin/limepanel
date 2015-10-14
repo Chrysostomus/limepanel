@@ -59,7 +59,7 @@ if [ $(pgrep -cx lemonbar) -gt 1 ] ; then
     done
 fi
 
-trap 'trap - TERM; kill 0' INT TERM QUIT EXIT
+#trap 'trap - TERM; kill 0' INT TERM QUIT EXIT
 
 #Collect info to PANEL_FIFO  
 [ -e "$PANEL_FIFO" ] && rm "$PANEL_FIFO"
