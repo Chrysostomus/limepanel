@@ -57,10 +57,10 @@ else
 #           System =======================================
 		ReturnToMain     "limemenu" \
                 Files            "spacefm" \
-                PackageManager   "terminal -e yaourt-gui" \
+                PackageManager   "terminal -e pacli" \
                 EditMirrorlist	 "terminal -e sudo pacman-mirrors -i" \
                 SystemUpdates    "terminal -e allservers" \
-                DowngradePackage "terminal -e downgrade $(sudo pacman -Qq | dmenu $DMENU_OPTIONS -p "Select package to downgrade")" \
+#                DowngradePackage "terminal -e downgrade $(sudo pacman -Qq | dmenu $DMENU_OPTIONS -p "Select package to downgrade")" \
                 Gnome-disks	 "gnome-disks" \
          )
     ;;
