@@ -10,19 +10,7 @@ pkgdesc="Panel script for bspwm using patched dmenu and lemonbar"
 arch=any
 url=https://github.com/Chrysostomus/limepanel
 license=MIT
-depends=('dmenu-manjaro'
-	'lemonbar-xft-clicky'
-	'xdotool'
-	'pulseaudio-ctl'
-	'rxvt-unicode'
-	'networkmanager-dmenu'
-	'conky-cli'
-	'xorg-xdpyinfo'
-	'xtitle'
-	'bdf-zevv-peep'
-	'ttf-ionicons'
-	'zenity'
-	'xdg-utils'
+depends=('lemonpanel'
 	'pmenu')
 makedepends=git
 source="git://github.com/Chrysostomus/limepanel"
