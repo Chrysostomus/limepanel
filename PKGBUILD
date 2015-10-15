@@ -10,8 +10,7 @@ pkgdesc="Panel script for bspwm using patched dmenu and lemonbar"
 arch=any
 url=https://github.com/Chrysostomus/limepanel
 license=MIT
-depends=('lemonpanel'
-	'pmenu')
+depends=('lemonpanel)
 makedepends=git
 source="git://github.com/Chrysostomus/limepanel"
 md5sums=('SKIP')
