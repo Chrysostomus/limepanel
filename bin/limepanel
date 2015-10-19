@@ -3,7 +3,7 @@
 
 #set height and font if unset 
  
-export PANEL_FIFO="$HOME/.config/bspwm/panfifo"
+export PANEL_FIFO="/tmp/panel-fifo"
 [[  $PANEL_HEIGHT && ${PANEL_HEIGHT-x} ]] && panel_height=$PANEL_HEIGHT || panel_height='25'
 [[  $PANEL_FONT_FAMILY && ${PANEL_FONT_FAMILY-x} ]] && mainfont=$PANEL_FONT_FAMILY || mainfont='-zevv-*-*-*-*-*-20-*-*-*-*-*-*-*'
 [[  $FONT_FAMILY3 && ${FONT_FAMILY3-x} ]] && iconfont=$FONT_FAMILY3 || iconfont="-*-ionicons-medium-r-normal-*-25-*-*-*-p-*-*-1"
