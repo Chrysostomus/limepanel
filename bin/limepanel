@@ -7,8 +7,7 @@ export PANEL_FIFO="/tmp/panel-fifo"
 [[  $PANEL_HEIGHT && ${PANEL_HEIGHT-x} ]] && panel_height=$PANEL_HEIGHT || panel_height='25'
 [[  $PANEL_FONT_FAMILY && ${PANEL_FONT_FAMILY-x} ]] && mainfont=$PANEL_FONT_FAMILY || mainfont='-zevv-*-*-*-*-*-20-*-*-*-*-*-*-*'
 [[  $FONT_FAMILY3 && ${FONT_FAMILY3-x} ]] && iconfont=$FONT_FAMILY3 || iconfont="-*-ionicons-medium-r-normal-*-25-*-*-*-p-*-*-1"
-#Set height if unset
-[[  $PANEL_HEIGHT && ${PANEL_HEIGHT-x} ]] && panel_height=$PANEL_HEIGHT || panel_height=25
+
  
 # From panel_colors file 
 COLOR_FOCUSED_DESKTOP_FG="#FF99CC99"
