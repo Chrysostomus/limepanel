@@ -1,9 +1,6 @@
 #!/bin/bash
 # Originally by https://github.com/windelicato/
-# Pretty much rewritten by Chrysostomus with much help from arch and manjaro forums.
-# usage: windowgrabber {left,right,up,down} (distance)
-# Moves window regardles of it's floating state, moves into preselection 
-# if there is one and to next monitor if moving off desktop edge.
+
 follower() {
 while [[ $(pgrep -cx bspwm_window_move.sh) = 1 ]] ; do
 	bspc config pointer_follows_focus false
@@ -12,7 +9,7 @@ done
 
 trap 'follower' INT TERM QUIT EXIT
 
-SIZE=${2:-'20'}
+size=${2:-'20'}
 dir=$1
 
 bspc config pointer_follows_focus true
@@ -37,7 +34,8 @@ if is_floating; then
      		sign="+"
      		;;
  		esac
- xdo move ${switch} ${sign}${SIZE}
+ xdo move ${switch} ${sign}${size
+
 # Otherwise, window is tiled: switch with window in given direction
 else
         bspc window -w ${dir}.manual || bspc window -s ${dir} ||  bspc window -m ${dir} && bspc monitor -f
