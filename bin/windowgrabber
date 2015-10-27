@@ -1,8 +1,44 @@
 #!/bin/bash
-#Move tiled window and pointer with keyboard, across monitors if need be
-#Called like this in sxhkdrc:
-#super + shift + {a,s,w,d}
-#   windowgrabber {left,down,up,right}
-bspc config pointer_follows_focus true; \
-swapOrMoveIn.sh $@ || bspc window -m $@ && bspc monitor -f $@; \
-bspc config pointer_follows_focus false
+# Originally by https://github.com/windelicato/
+# Pretty much rewritten by Chrysostomus with much help from arch and manjaro forums.
+# usage: windowgrabber {left,right,up,down} (distance)
+# Moves window regardles of it's floating state, moves into preselection 
+# if there is one and to next monitor if moving off desktop edge.
+follower() {
+while [[ $(pgrep -cx bspwm_window_move.sh) = 1 ]] ; do
+	bspc config pointer_follows_focus false
+done
+}
+
+trap 'follower' INT TERM QUIT EXIT
+
+SIZE=${2:-'20'}
+dir=$1
+
+bspc config pointer_follows_focus true
+# Find current window mode
+is_floating() {
+bspc query -T -w | grep -o "f........\*"
+}
+# If the window is floating, move it
+if is_floating; then
+#only parse input if window is floating,tiled windows accept input as is
+        case "$dir" in
+  			left) switch="-x"
+  		      sign="-"
+        	;;
+  			right) switch="-x"
+         	sign="+"
+       		;;
+  			up) switch="-y"
+         	sign="-"
+        	;;
+  			*) switch="-y"
+     		sign="+"
+     		;;
+ 		esac
+ xdo move ${switch} ${sign}${SIZE}
+# Otherwise, window is tiled: switch with window in given direction
+else
+        bspc window -w ${dir}.manual || bspc window -s ${dir} ||  bspc window -m ${dir} && bspc monitor -f
+fi
