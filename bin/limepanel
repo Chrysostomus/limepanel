@@ -48,13 +48,6 @@ fi
 mkfifo "$PANEL_FIFO"
 
 bspc config top_padding $(($PANEL_HEIGHT-$gap))
-bspc control --subscribe > "$PANEL_FIFO" &
-# Title
-xtitle -sf 'T%s' > "$PANEL_FIFO" &
-#conkywrap && \
-conky -c ~/.config/bspwm/panel/conkyrc > "$PANEL_FIFO" &
-volume_status.sh &
- 
 
 function lime {
  while read -r line ; do
@@ -98,16 +91,41 @@ function lime {
  done
 }
 
-# Actually invoking the panel and piping to bar
- 
-cat $PANEL_FIFO \
-	| lime \
-	| lemonbar \
-	-g x$panel_height \
-	-f "$mainfont" -o -1 \
-	-f "$iconfont" -o 0 \
-	-o -3 -f 'dejavu sans mono for Powerline :size=12 :style=regular' \
-	-F '#FF99CC99' \
-	-B '#FF000000' \
-	| while read line; do eval "$line"; done &
+# Rename monitors to numbers
+
+i=1
+for monitor in $(bspc query -M); do
+    bspc monitor $monitor \
+        -n "$i" \
+    let i++
+done
+unset i
+# Create panel for each monitor
+for i in $(bspc query -M); do
+	# Remove old fifos and create new ones
+	[ -e "$PANEL_FIFO$i" ] && rm "$PANEL_FIFO$i"
+	mkfifo "$PANEL_FIFO$i"
+	# Wm infos of specific monitor
+	bspc control --subscribe |\
+        grep -oE "[Mm]$i[^TM]*[TML]" --line-buffered |\
+        while read line; do echo W$line; done \
+            > "$PANEL_FIFO$i" &
+	# Title
+	xtitle -t 80 -sf 'T%s' > "$PANEL_FIFO$i" &
+	# conky infos
+	pgrep conky > /dev/null || (conky -c ~/.config/bspwm/panel/conkyrc > "$PANEL_FIFO$i" &)
+	# Volume-infos
+	volume_status.sh &
+	# Pipe all the info to lemonbar
+	cat $PANEL_FIFO$i $PANEL_FIFO \
+		| lime \
+		| lemonbar \
+		-g x$panel_height \
+		-f "$mainfont" -o -1 \
+		-f "$iconfont" -o 0 \
+		-o -3 -f 'dejavu sans mono for Powerline :size=12 :style=regular' \
+		-F '#FF99CC99' \
+		-B '#FF000000' \
+		| while read line; do eval "$line"; done &
+done
 wait
