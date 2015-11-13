@@ -66,4 +66,10 @@ xrandr | grep "LVDS1 connected" &> /dev/null && connect_LVDS || disconnect_LVDS
      bspc monitor $(bspc query -M | awk NR==4) -d i ii iii iv v vi vi vii viii ix x
      bspc monitor $(bspc query -M | awk NR==5) -d IX X
   else
-    for monitor 
+    for monitor in $(bspc query -M); do
+    bspc monitor $monitor \
+        -n "$I" \
+        -d $I/{a,b,c}
+     let I++
+     done
+ fi
