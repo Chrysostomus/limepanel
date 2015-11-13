@@ -22,7 +22,7 @@ function conkywrap {
 	sed -i 's/wlp1s0/'$interface'/g' $HOME/.config/bspwm/panel/conkyrc &
 }
 
-logo="%{A:dmainmenu.sh &disown:}  %{A}"
+logo="%{A:limemenu &disown:}  %{A}"
 # Kill any panel processes older than us, instead of bailing like the example
 # does. That caused one too many panel-less boots for me.
  
@@ -100,6 +100,10 @@ for monitor in $(bspc query -M); do
     let i++
 done
 unset i
+
+# Create desktops for each monitor
+mkdesktops
+
 # Create panel for each monitor
 for i in $(bspc query -M); do
 	# Remove old fifos and create new ones
