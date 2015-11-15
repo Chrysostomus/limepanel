@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #super + shift + {1-9}
 #   movetodesktopofthismonitor ^{1-9}
 D=$@; \
