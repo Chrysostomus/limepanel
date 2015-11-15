@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #Focus nth desktop of focused monitor for i3 style keybinds
 #
 #super + {1-9}
