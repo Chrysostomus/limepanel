@@ -25,17 +25,14 @@ function conkywrap {
 logo="%{A:limemenu &disown:}  %{A}"
 # Kill any panel processes older than us, instead of bailing like the example
 # does. That caused one too many panel-less boots for me.
- 
-while [ $(pgrep -cx limepanel) -gt 1 ] ; do
+
+while [ $(pgrep -cx limepanel) -gt 1 -o $(pgrep -cx lemonbar) -gt 1 ] ; do
 	pkill -ox -9 limepanel
 	pkill -ox -9 lemonbar
 	killall -9 stalonetray
 	killall -9 xtitle
 	killall -9 conky
 done
-if [ $(pgrep -cx lemonbar) -gt 1 ] ; then
-        pkill -n -9 "lemonbar"
-fi
 
 trap 'trap - TERM; kill 0' INT TERM QUIT EXIT
 
