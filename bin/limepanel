@@ -34,14 +34,10 @@ while [ $(pgrep -cx limepanel) -gt 1 ] ; do
 	killall -9 conky
 done
 if [ $(pgrep -cx lemonbar) -gt 1 ] ; then
-	printf "%s\n" "The panel is already running."
-    while [[ $(pgrep -c "lemonbar") != 0 ]]
-    do
         pkill -n -9 "lemonbar"
-    done
 fi
 
-#trap 'trap - TERM; kill 0' INT TERM QUIT EXIT
+trap 'trap - TERM; kill 0' INT TERM QUIT EXIT
 
 #Collect info to PANEL_FIFO  
 [ -e "$PANEL_FIFO" ] && rm "$PANEL_FIFO"
@@ -117,7 +113,7 @@ for i in $(bspc query -M); do
 	# Title
 	xtitle -t 80 -sf 'T%s' > "$PANEL_FIFO$i" &
 	# conky infos
-	pgrep conky > /dev/null || (conky -c ~/.config/bspwm/panel/conkyrc > "$PANEL_FIFO$i" &)
+	[ $(pgrep -cx limepanel) -lt 1 ] || conky -c ~/.config/bspwm/panel/conkyrc > /tmp/panel-fifo1 &
 	# Volume-infos
 	volume_status.sh &
 	# Pipe all the info to lemonbar
