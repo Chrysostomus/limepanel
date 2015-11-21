@@ -34,7 +34,7 @@ while [ $(pgrep -cx limepanel) -gt 1 -o $(pgrep -cx lemonbar) -gt 1 ] ; do
 	killall -9 conky
 done
 
-trap 'trap - TERM; kill 0' INT TERM QUIT EXIT
+#trap 'trap - TERM; kill 0' INT TERM QUIT EXIT
 
 #Collect info to PANEL_FIFO  
 [ -e "$PANEL_FIFO" ] && rm "$PANEL_FIFO"
