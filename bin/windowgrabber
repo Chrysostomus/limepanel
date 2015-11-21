@@ -15,7 +15,7 @@ dir=$1
 bspc config pointer_follows_focus true
 # Find current window mode
 is_floating() {
-bspc query -T -w | grep -o "f........\*"
+bspc query -T -w | grep -qo "f........\*"
 }
 # If the window is floating, move it
 if is_floating; then
