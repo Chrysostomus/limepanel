@@ -34,7 +34,7 @@ if is_floating; then
      		sign="+"
      		;;
  		esac
- xdo move ${switch} ${sign}${size
+ xdo move ${switch} ${sign}${size}
 
 # Otherwise, window is tiled: switch with window in given direction
 else
