@@ -7,7 +7,9 @@ export PANEL_FIFO="/tmp/panel-fifo"
 [[  $PANEL_HEIGHT && ${PANEL_HEIGHT-x} ]] && panel_height=$PANEL_HEIGHT || panel_height='25'
 [[  $PANEL_FONT_FAMILY && ${PANEL_FONT_FAMILY-x} ]] && mainfont=$PANEL_FONT_FAMILY || mainfont='-zevv-*-*-*-*-*-20-*-*-*-*-*-*-*'
 [[  $FONT_FAMILY3 && ${FONT_FAMILY3-x} ]] && iconfont=$FONT_FAMILY3 || iconfont="-*-ionicons-medium-r-normal-*-25-*-*-*-p-*-*-1"
-
+eval wm=$(xprop -notype -id "$(xprop -root -notype | \
+awk '$1=="_NET_SUPPORTING_WM_CHECK:"{print $5}')" -f _NET_WM_NAME 8u | \
+awk -F "\"" '/WM_NAME/ {print $2}' | head -n 1)
  
 # From panel_colors file 
 COLOR_FOCUSED_DESKTOP_FG="#FF99CC99"
@@ -16,10 +18,10 @@ COLOR_DESKTOP_FG='#FFF6F9FF'
 COLOR_DESKTOP_BG="#FF000000"
 
 function conkywrap {
-	bat=$(ls /sys/class/power_supply | grep --color=never 'BAT*')
+	bat=$(echo /sys/class/power_supply/* | grep -o "BAT.")
 	interface=$(awk 'NR>1{print $6}' < /proc/net/arp)
-	sed -i 's/BAT1/'$bat'/g' $HOME/.config/bspwm/panel/conkyrc &
-	sed -i 's/wlp1s0/'$interface'/g' $HOME/.config/bspwm/panel/conkyrc &
+	sed -i "s/BAT./$bat/g" $HOME/.config/bspwm/panel/conkyrc &
+	sed -i "s/wlp1s0/$interface/g" $HOME/.config/bspwm/panel/conkyrc &
 }
 
 logo="%{A:limemenu &disown:}  %{A}"
@@ -35,10 +37,6 @@ while [ $(pgrep -cx limepanel) -gt 1 -o $(pgrep -cx lemonbar) -gt 1 ] ; do
 done
 
 #trap 'trap - TERM; kill 0' INT TERM QUIT EXIT
-
-#Collect info to PANEL_FIFO  
-[ -e "$PANEL_FIFO" ] && rm "$PANEL_FIFO"
-mkfifo "$PANEL_FIFO"
 
 bspc config top_padding $(($PANEL_HEIGHT-$gap))
 
@@ -69,7 +67,7 @@ function lime {
                         ;;
                     # show used unfocused (hide free unused)
                     o*|u*)#f*
-                        desktops="${desktops}%{F$COLOR_DESKTOP_FG}%{B$COLOR_DESKTOP_BG}%{A:bspc desktop -f ${name}:}${name}%{A}%{B-} %{F-}"
+                        desktops="${desktops}%{F$COLOR_DESKTOP_FG}%{B$COLOR_DESKTOP_BG}%{A:wmctrl -s $(wmctrl -d | grep " ${name}$" | cut -d' ' -f1):}${name}%{A}%{B-} %{F-}"
                         ;;
                     L*)
                     # layout
@@ -84,8 +82,9 @@ function lime {
  done
 }
 
+# Ensure conky has right interface names
+conkywrap
 # Rename monitors to numbers
-
 i=1
 for monitor in $(bspc query -M); do
     bspc monitor $monitor \
@@ -96,6 +95,9 @@ unset i
 
 # Create desktops for each monitor
 mkdesktops
+
+#Use bspwm options if bspwm is running, otherwise use generic option
+if [[ $wm == bspwm ]]; then
 
 # Create panel for each monitor
 for i in $(bspc query -M); do
@@ -110,7 +112,7 @@ for i in $(bspc query -M); do
 	# Title
 	xtitle -t 80 -sf 'T%s' > "$PANEL_FIFO$i" &
 	# conky infos
-	[ $(pgrep -cx limepanel) -lt 1 ] || conky -c ~/.config/bspwm/panel/conkyrc > /tmp/panel-fifo1 &
+	[ $(pgrep -cx citruspanel) -lt 1 ] || conky -c ~/.config/bspwm/panel/conkyrc > /tmp/panel-fifo1 &
 	# Volume-infos
 	volume_status.sh &
 	# Pipe all the info to lemonbar
@@ -125,4 +127,30 @@ for i in $(bspc query -M); do
 		-B '#FF000000' \
 		| while read line; do eval "$line"; done &
 done
+else
+	#Collect info to PANEL_FIFO 
+	i=1 
+	[ -e "$PANEL_FIFO$i" ] && rm "$PANEL_FIFO$i"
+	mkfifo "$PANEL_FIFO$i"
+	#Collect desktop infos
+	desktop-info |\
+        while read line; do echo W$line; done \
+            > "$PANEL_FIFO$i" &
+	# Title
+	xtitle -t 80 -sf 'T%s' > "$PANEL_FIFO$i" &
+	# conky infos	
+	conky -c ~/.config/bspwm/panel/conkyrc > "$PANEL_FIFO$i" &
+	# Volume-infos
+	volume_status.sh &
+		cat $PANEL_FIFO$i \
+		| lime \
+		| lemonbar \
+		-g x$panel_height \
+		-f "$mainfont" -o -1 \
+		-f "$iconfont" -o 0 \
+		-o -3 -f 'dejavu sans mono for Powerline :size=12 :style=regular' \
+		-F '#FF99CC99' \
+		-B '#FF000000' \
+		| while read line; do eval "$line"; done &
+fi
 wait
