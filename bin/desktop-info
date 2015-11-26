@@ -1,0 +1,9 @@
+#!/bin/bash
+#List connected monitors:
+#xrandr -q |  awk '/ connected/ {print $1}'
+xprop -spy -root _NET_CURRENT_DESKTOP | while read line; do
+	current_desktop=$(echo $line | awk '{print $3+2}')
+	occupied_desktops=($(wmctrl -l | awk '{print $2}' | uniq | awk '{for(i=1; i<=NF; i++) print $i+2}'))
+	list=${occupied_desktops[@]}
+	xprop -root _NET_DESKTOP_NAMES | sed -e 's/_NET_DESKTOP_NAMES(UTF8_STRING) =/WM1/g;s/ "/:f/g;s/",//g;s/"/:/g;s/.*/&LT/g' | awk -F':' -vOFS=':' -v d="$list" -v focused="$current_desktop" 'BEGIN{split(d, a, " ")} { gsub("f", "O", $focused)} {for (i in a) gsub("f", "o", $(a[i])); print}'
+done
