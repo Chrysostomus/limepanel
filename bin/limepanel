@@ -17,13 +17,6 @@ COLOR_FOCUSED_DESKTOP_BG="#FF000000"
 COLOR_DESKTOP_FG='#FFF6F9FF'
 COLOR_DESKTOP_BG="#FF000000"
 
-function conkywrap {
-	bat=$(echo /sys/class/power_supply/* | grep -o "BAT.")
-	interface=$(awk 'NR>1{print $6}' < /proc/net/arp)
-	sed -i "s/BAT./$bat/g" $HOME/.config/bspwm/panel/conkyrc &
-	sed -i "s/wlp1s0/$interface/g" $HOME/.config/bspwm/panel/conkyrc &
-}
-
 logo="%{A:limemenu &disown:}  %{A}"
 # Kill any panel processes older than us, instead of bailing like the example
 # does. That caused one too many panel-less boots for me.
@@ -82,8 +75,6 @@ function lime {
  done
 }
 
-# Ensure conky has right interface names
-conkywrap
 # Rename monitors to numbers
 i=1
 for monitor in $(bspc query -M); do
