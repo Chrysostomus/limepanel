@@ -1,0 +1,10 @@
+#!/bin/sh
+
+function conkywrap {
+	bat=$(echo /sys/class/power_supply/* | grep -o "BAT.")
+	interface=$(awk 'NR>1{print $6}' < /proc/net/arp)
+	sed -i "s/BAT./$bat/g" $HOME/.config/bspwm/panel/conkyrc &
+	sed -i "s/wlp1s0/$interface/g" $HOME/.config/bspwm/panel/conkyrc &
+}
+cp ~/.config/bspwm/panel/conkyrc ~/.config/bspwm/panel/conkyrc.bak
+conkywrap
