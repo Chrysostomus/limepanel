@@ -103,7 +103,7 @@ for i in $(bspc query -M); do
 	# Title
 	xtitle -t 80 -sf 'T%s' > "$PANEL_FIFO$i" &
 	# conky infos
-	[ $(pgrep -cx citruspanel) -lt 1 ] || conky -c ~/.config/bspwm/panel/conkyrc > /tmp/panel-fifo1 &
+	[ $(pgrep -cx conky) -lt 1 ] && conky -c ~/.config/bspwm/panel/conkyrc > /tmp/panel-fifo$i &
 	# Volume-infos
 	volume_status.sh &
 	# Pipe all the info to lemonbar
