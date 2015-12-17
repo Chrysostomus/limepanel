@@ -4,6 +4,155 @@
 #set height and font if unset 
  
 export PANEL_FIFO="/tmp/panel-fifo"
+panel_height='25'
+mainfont='-zevv-*-*-*-*-*-20-*-*-*-*-*-*-*'
+iconfont="-*-ionicons-medium-r-normal-*-25-*-*-*-p-*-*-1"
+eval wm=$(xprop -notype -id "$(xprop -root -notype | \
+awk '$1=="_NET_SUPPORTING_WM_CHECK:"{print $5}')" -f _NET_WM_NAME 8u | \
+awk -F "\"" '/WM_NAME/ {print $2}' | head -n 1)
+ 
+# From panel_colors file 
+COLOR_FOCUSED_DESKTOP_FG="#FF99CC99"
+COLOR_FOCUSED_DESKTOP_BG="#FF000000"
+COLOR_DESKTOP_FG='#FFF6F9FF'
+COLOR_DESKTOP_BG="#FF000000"
+
+logo="%{A:limemenu &disown:}  %{A}"
+# Kill any panel processes older than us, instead of bailing like the example
+# does. That caused one too many panel-less boots for me.
+
+while [ $(pgrep -cx limepanel) -gt 1 -o $(pgrep -cx lemonbar) -gt 1 ] ; do
+	pkill -ox -9 limepanel
+	pkill -ox -9 lemonbar
+	killall -9 stalonetray
+	killall -9 xtitle
+	killall -9 conky
+done
+
+#trap 'trap - TERM; kill 0' INT TERM QUIT EXIT
+
+bspc config top_padding $(($PANEL_HEIGHT-$gap))
+
+menu="%{A:BspwmWindowMenu:} %{A}%{A:BspwmDesktopMenu:} %{A}"
+
+function lime {
+ while read -r line ; do
+    case $line in
+        T*)
+            title="${line#?}"
+            ;;
+	C*)
+            conky_infos="%{F#FF99CC99}${line#?}"
+            ;;
+	V*)
+            volume_infos="${RA}%{F#FF99CC99} ${line#?} "
+            ;;    	    
+        W*)
+            # bspwm internal state
+            desktops=""
+            IFS=':'
+            set -- ${line#?}
+            while [ $# -gt 0 ] ; do
+                item=$1
+                name=${item#?}
+                case $item in
+                    # always show focused desktops
+                    O*|F*|U*)
+                        desktops="${desktops}%{F$COLOR_FOCUSED_DESKTOP_FG}%{B$COLOR_FOCUSED_DESKTOP_BG}%{U"#FF99CC99"}%{+u}${name}%{-u} %{B-}%{F-}"
+                        ;;
+                    # show used unfocused (hide free unused)
+                    o*|u*)#f*
+                        desktops="${desktops}%{F$COLOR_DESKTOP_FG}%{B$COLOR_DESKTOP_BG}%{A:wmctrl -s $(wmctrl -d | grep " ${name}$" | cut -d' ' -f1):}${name}%{A}%{B-} %{F-}"
+                        ;;
+                    L*)
+                    # layout
+                        layout="%{A:bspc desktop -l next:}$wm_infos${name}%{B-}%{F-}%{A}"
+                        ;;
+                esac
+                shift
+            done
+            ;;
+    esac
+    printf "%s\n" "%{l}${logo}${desktops}${layout}%{F#FFF6F9FF}%{c}${title}%{r}%{F$COLOR_FOCUSED_DESKTOP_FG}$menu$volume_infos${conky_infos}"
+ done
+}
+
+# Rename monitors to numbers
+i=1
+for monitor in $(bspc query -M); do
+    bspc monitor $monitor \
+        -n "$i" \
+    let i++
+done
+unset i
+
+# Create desktops for each monitor
+mkdesktops
+
+#Use bspwm options if bspwm is running, otherwise use generic option
+if [[ $wm == bspwm ]]; then
+
+# Create panel for each monitor
+for i in $(bspc query -M); do
+	# Remove old fifos and create new ones
+	[ -e "$PANEL_FIFO$i" ] && rm "$PANEL_FIFO$i"
+	mkfifo "$PANEL_FIFO$i"
+	# Wm infos of specific monitor
+	bspc control --subscribe |\
+        grep -oE "[Mm]$i[^TM]*[TML]" --line-buffered |\
+        while read line; do echo W$line; done \
+            > "$PANEL_FIFO$i" &
+	# Title
+	xtitle -t 80 -sf 'T%s' > "$PANEL_FIFO$i" &
+	# conky infos
+	[ $(pgrep -cx conky) -lt 1 ] && conky -c ~/.config/bspwm/panel/conkyrc > /tmp/panel-fifo$i &
+	# Volume-infos
+	volume_status.sh &
+	# Pipe all the info to lemonbar
+	cat $PANEL_FIFO$i $PANEL_FIFO \
+		| lime \
+		| lemonbar \
+		-g x$panel_height \
+		-f "$mainfont" -o -1 \
+		-f "$iconfont" -o 0 \
+		-o -3 -f 'dejavu sans mono for Powerline :size=12 :style=regular' \
+		-F '#FF99CC99' \
+		-B '#FF000000' \
+		| while read line; do eval "$line"; done &
+done
+else
+	#Collect info to PANEL_FIFO 
+	i=1 
+	[ -e "$PANEL_FIFO$i" ] && rm "$PANEL_FIFO$i"
+	mkfifo "$PANEL_FIFO$i"
+	#Collect desktop infos
+	desktop-info |\
+        while read line; do echo W$line; done \
+            > "$PANEL_FIFO$i" &
+	# Title
+	xtitle -t 80 -sf 'T%s' > "$PANEL_FIFO$i" &
+	# conky infos	
+	conky -c ~/.config/bspwm/panel/conkyrc > "$PANEL_FIFO$i" &
+	# Volume-infos
+	volume_status.sh &
+		cat $PANEL_FIFO$i \
+		| lime \
+		| lemonbar \
+		-g x$panel_height \
+		-f "$mainfont" -o -1 \
+		-f "$iconfont" -o 0 \
+		-o -3 -f 'dejavu sans mono for Powerline :size=12 :style=regular' \
+		-F '#FF99CC99' \
+		-B '#FF000000' \
+		| while read line; do eval "$line"; done &
+fi
+wait
+#! /bin/bash
+#panel script for bspwm using i3 style workspace indicator
+
+#set height and font if unset 
+ 
+export PANEL_FIFO="/tmp/panel-fifo"
 [[  $PANEL_HEIGHT && ${PANEL_HEIGHT-x} ]] && panel_height=$PANEL_HEIGHT || panel_height='25'
 [[  $PANEL_FONT_FAMILY && ${PANEL_FONT_FAMILY-x} ]] && mainfont=$PANEL_FONT_FAMILY || mainfont='-zevv-*-*-*-*-*-20-*-*-*-*-*-*-*'
 [[  $FONT_FAMILY3 && ${FONT_FAMILY3-x} ]] && iconfont=$FONT_FAMILY3 || iconfont="-*-ionicons-medium-r-normal-*-25-*-*-*-p-*-*-1"
