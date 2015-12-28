@@ -17,7 +17,7 @@ COLOR_FOCUSED_DESKTOP_BG="#FF000000"
 COLOR_DESKTOP_FG='#FFF6F9FF'
 COLOR_DESKTOP_BG="#FF000000"
 
-logo="%{A:limemenu &disown:}  %{A}"
+logo="%{A:dmainmenu.sh &disown:}  %{A}"
 # Kill any panel processes older than us, instead of bailing like the example
 # does. That caused one too many panel-less boots for me.
 
