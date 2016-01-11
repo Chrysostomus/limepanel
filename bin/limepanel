@@ -1,15 +1,25 @@
 #! /bin/bash
 #panel script for bspwm using i3 style workspace indicator
- 
+
+#set height and font if unset 
+
+if ! [ -f "$HOME/.panelrc" ]; then
+	cat > $HOME/.panelrc <<EOL
 export PANEL_FIFO="/tmp/panel-fifo"
 panel_height='25'
 mainfont='-zevv-*-*-*-*-*-20-*-*-*-*-*-*-*'
-iconfont="-*-ionicons-medium-r-normal-*-25-*-*-*-p-*-*-1" 
+iconfont="-*-ionicons-medium-r-normal-*-25-*-*-*-p-*-*-1"
+powerlinefont='dejavu sans mono for Powerline :size=12 :style=regular'
+gap=15
 # From panel_colors file 
 COLOR_FOCUSED_DESKTOP_FG='#FF99CC99'
 COLOR_FOCUSED_DESKTOP_BG="#FF000000"
 COLOR_DESKTOP_FG='#FFF6F9FF'
 COLOR_DESKTOP_BG="#FF000000"
+EOL
+fi
+
+. $HOME/.panelrc
 
 eval wm=$(xprop -notype -id "$(xprop -root -notype | \
 awk '$1=="_NET_SUPPORTING_WM_CHECK:"{print $5}')" -f _NET_WM_NAME 8u | \
@@ -29,7 +39,7 @@ done
 
 #trap 'trap - TERM; kill 0' INT TERM QUIT EXIT
 
-bspc config top_padding $(($PANEL_HEIGHT - $gap))
+bspc config top_padding $((panel_height-gap))
 
 menu="%{A:BspwmWindowMenu:} %{A}%{A:BspwmDesktopMenu:} %{A}"
 
@@ -113,7 +123,7 @@ for i in $(bspc query -M); do
 		-g x$panel_height \
 		-f "$mainfont" -o -1 \
 		-f "$iconfont" -o 0 \
-		-o -3 -f 'dejavu sans mono for Powerline :size=12 :style=regular' \
+		-o -3 -f "$powerlinefont" \
 		-F $COLOR_FOCUSED_DESKTOP_FG \
 		-B $COLOR_DESKTOP_BG \
 		| while read line; do eval "$line"; done &
@@ -139,7 +149,7 @@ else
 		-g x$panel_height \
 		-f "$mainfont" -o -1 \
 		-f "$iconfont" -o 0 \
-		-o -3 -f 'dejavu sans mono for Powerline :size=12 :style=regular' \
+		-o -3 -f "$powerlinefont" \
 		-F $COLOR_FOCUSED_DESKTOP_FG \
 		-B $COLOR_DESKTOP_BG \
 		| while read line; do eval "$line"; done &
