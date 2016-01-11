@@ -3,9 +3,8 @@
 
 #set height and font if unset 
 
-if ! [ -f "$HOME/.panelrc" ]; then
-	cat > $HOME/.panelrc <<EOL
-export PANEL_FIFO="/tmp/panel-fifo"
+if ! [ -f "$HOME/.limepanelrc" ]; then
+	cat > $HOME/.limepanelrc <<EOL
 panel_height='25'
 mainfont='-zevv-*-*-*-*-*-20-*-*-*-*-*-*-*'
 iconfont="-*-ionicons-medium-r-normal-*-25-*-*-*-p-*-*-1"
@@ -18,8 +17,9 @@ COLOR_DESKTOP_FG='#FFF6F9FF'
 COLOR_DESKTOP_BG="#FF000000"
 EOL
 fi
+export PANEL_FIFO="/tmp/panel-fifo"
 
-. $HOME/.panelrc
+. $HOME/.limepanelrc
 
 eval wm=$(xprop -notype -id "$(xprop -root -notype | \
 awk '$1=="_NET_SUPPORTING_WM_CHECK:"{print $5}')" -f _NET_WM_NAME 8u | \
