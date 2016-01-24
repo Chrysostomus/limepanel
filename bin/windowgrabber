@@ -21,13 +21,13 @@ bspc query -T -w | grep -q '"state": "floating"'
 if is_floating; then
 #only parse input if window is floating,tiled windows accept input as is
         case "$dir" in
-  		left) switch="-x"
+  		west) switch="-x"
   		sign="-"
         	;;
-  		right) switch="-x"
+  		east) switch="-x"
          	sign="+"
        		;;
-  		up) switch="-y"
+  		north) switch="-y"
          	sign="-"
         	;;
   		*) switch="-y"
