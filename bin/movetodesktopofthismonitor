@@ -2,4 +2,4 @@
 #super + shift + {1-9}
 #   movetodesktopofthismonitor ^{1-9}
 D=$@; \
-bspc window -d "$(bspc query -D -m | sed -n "$D p")"
+bspc node -d "$(bspc query -D -m | sed -n "$D p")"
