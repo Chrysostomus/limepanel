@@ -63,7 +63,7 @@ sigStrength()
         then
                 echo %{F$COLOR_FOCUSED_DESKTOP_FG}"▁▃"$DARKGREY"▅▇"%{F$COLOR_FOCUSED_DESKTOP_FG}
         else
-                echo $DARKGREY" "
+                echo $DARKGREY""%{F$COLOR_FOCUSED_DESKTOP_FG}
         fi
 }
 
