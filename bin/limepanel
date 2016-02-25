@@ -10,22 +10,17 @@ mainfont='-zevv-*-*-*-*-*-20-*-*-*-*-*-*-*'
 iconfont="-*-ionicons-medium-r-normal-*-25-*-*-*-p-*-*-1"
 powerlinefont='dejavu sans mono for Powerline :size=12 :style=regular'
 gap=15
-# From panel_colors file 
-COLOR_FOCUSED_DESKTOP_FG='#FF99CC99'
+COLOR_FOCUSED_DESKTOP_FG='#FF1ABB9B'
 COLOR_FOCUSED_DESKTOP_BG="#FF000000"
 COLOR_DESKTOP_FG='#FFF6F9FF'
 COLOR_DESKTOP_BG="#FF000000"
+UPDATE_INTERVAL="2"
 EOL
 fi
 export PANEL_FIFO="/tmp/panel-fifo"
 
 . $HOME/.limepanelrc
 
-eval wm=$(xprop -notype -id "$(xprop -root -notype | \
-awk '$1=="_NET_SUPPORTING_WM_CHECK:"{print $5}')" -f _NET_WM_NAME 8u | \
-awk -F "\"" '/WM_NAME/ {print $2}' | head -n 1)
-
-logo="%{A:dmainmenu.sh &disown:}  %{A}"
 # Kill any panel processes older than us, instead of bailing like the example
 # does. That caused one too many panel-less boots for me.
 
@@ -34,14 +29,71 @@ while [ $(pgrep -cx limepanel) -gt 1 -o $(pgrep -cx lemonbar) -gt 1 ] ; do
 	pkill -ox -9 lemonbar
 	killall -9 stalonetray
 	killall -9 xtitle
-	killall -9 conky
 done
 
 #trap 'trap - TERM; kill 0' INT TERM QUIT EXIT
 
 bspc config top_padding $((panel_height-gap))
 
+[[  $UPDATE_INTERVAL && ${UPDATE_INTERVAL-x} ]] && update_interval=$UPDATE_INTERVAL || update_interval="2"
 menu="%{A:BspwmWindowMenu:} %{A}%{A:BspwmDesktopMenu:} %{A}"
+logo="%{A:dmainmenu.sh &disown:}  %{A}"
+DARKGREY="%{F#FF707880}"
+RED="%{F#FFA54242}"
+interface_up=$(ip link show | awk '/state UP/ {print substr($2, 1, length($2)-1)}')
+is_wifi()
+{
+	iwconfig $interface_up >/dev/null 2>&1
+}
+sigStrength()
+{
+  signalStrength=$(awk 'NR==3 { print substr($3, 1, length($3)-1)}' /proc/net/wireless)
+	final=$(echo $isEthernet | awk '{print $1}')
+
+	if ! is_wifi;
+	then
+        echo %{F$COLOR_FOCUSED_DESKTOP_FG}" "
+        elif [ "$signalStrength" -gt 64 ]
+        then
+                echo %{F$COLOR_FOCUSED_DESKTOP_FG}"▁▃▅▇"
+        elif [ "$signalStrength" -lt 65 ] && [ "$signalStrength" -gt 39 ]
+        then
+                echo %{F$COLOR_FOCUSED_DESKTOP_FG}"▁▃▅"$DARKGREY"▇"%{F$COLOR_FOCUSED_DESKTOP_FG}
+        elif [ "$signalStrength" -lt 40 ]
+        then
+                echo %{F$COLOR_FOCUSED_DESKTOP_FG}"▁▃"$DARKGREY"▅▇"%{F$COLOR_FOCUSED_DESKTOP_FG}
+        else
+                echo $DARKGREY" "
+        fi
+}
+
+battery() {
+	BATC=$(cat /sys/class/power_supply/BAT1/capacity)
+	BATS=$(cat /sys/class/power_supply/BAT1/status)
+	if [[ $BATS == "Charging" ]]; then
+		echo " $BATC%"
+	elif [ $BATC -gt 80 ]
+	then
+		echo " $BATC%"
+	elif [ $BATC -gt 50 ]
+	then
+		echo " $BATC%"
+	else 
+		echo "$RED $BATC%%{F$COLOR_FOCUSED_DESKTOP_FG}"
+	fi
+}
+
+clock() {
+    date '+%H:%M'
+}
+
+status()
+{
+while	:; do
+	echo "C%{A:networkmenuplacer.sh ; nmcli_dmenu:}$(sigStrength)%{A} %{A:dbright:}$(battery)%{A}  $(clock)"
+	sleep $update_interval
+done
+}
 
 function lime {
  while read -r line ; do
@@ -70,7 +122,7 @@ function lime {
                         ;;
                     # show used unfocused (hide free unused)
                     o*|u*)#f*
-                        desktops="${desktops}%{F$COLOR_DESKTOP_FG}%{B$COLOR_DESKTOP_BG}%{A:wmctrl -s $(wmctrl -d | grep " ${name}$" | cut -d' ' -f1):}${name}%{A}%{B-} %{F-}"
+                        desktops="${desktops}%{F$COLOR_DESKTOP_FG}%{B$COLOR_DESKTOP_BG}%{A:bspc desktop -f ${name}:}${name}%{A}%{B-} %{F-}"
                         ;;
                     L*)
                     # layout
@@ -94,13 +146,7 @@ for monitor in $(bspc query -M); do
 done
 unset i
 
-# Create desktops for each monitor
-mkdesktops
 
-#Use bspwm options if bspwm is running, otherwise use generic option
-if [[ $wm == bspwm ]]; then
-
-# Create panel for each monitor
 for i in $(bspc query -M); do
 	# Remove old fifos and create new ones
 	[ -e "$PANEL_FIFO$i" ] && rm "$PANEL_FIFO$i"
@@ -113,7 +159,9 @@ for i in $(bspc query -M); do
 	# Title
 	xtitle -t 80 -sf 'T%s' > "$PANEL_FIFO$i" &
 	# conky infos
-	[ $(pgrep -cx conky) -lt 1 ] && conky -c ~/.config/bspwm/panel/conkyrc > /tmp/panel-fifo$i &
+#	[ $(pgrep -cx conky) -lt 1 ] && conky -c ~/.config/bspwm/panel/conkyrc > /tmp/panel-fifo$i &
+	#status
+	status > /tmp/panel-fifo$i &
 	# Volume-infos
 	volume_status.sh &
 	# Pipe all the info to lemonbar
@@ -128,30 +176,4 @@ for i in $(bspc query -M); do
 		-B $COLOR_DESKTOP_BG \
 		| while read line; do eval "$line"; done &
 done
-else
-	#Collect info to PANEL_FIFO 
-	i=1 
-	[ -e "$PANEL_FIFO$i" ] && rm "$PANEL_FIFO$i"
-	mkfifo "$PANEL_FIFO$i"
-	#Collect desktop infos
-	desktop-info |\
-        while read line; do echo W$line; done \
-            > "$PANEL_FIFO$i" &
-	# Title
-	xtitle -t 80 -sf 'T%s' > "$PANEL_FIFO$i" &
-	# conky infos	
-	conky -c ~/.config/bspwm/panel/conkyrc > "$PANEL_FIFO$i" &
-	# Volume-infos
-	volume_status.sh &
-		cat $PANEL_FIFO$i \
-		| lime \
-		| lemonbar \
-		-g x$panel_height \
-		-f "$mainfont" -o -1 \
-		-f "$iconfont" -o 0 \
-		-o -3 -f "$powerlinefont" \
-		-F $COLOR_FOCUSED_DESKTOP_FG \
-		-B $COLOR_DESKTOP_BG \
-		| while read line; do eval "$line"; done &
-fi
 wait
