@@ -48,40 +48,46 @@ is_wifi()
 sigStrength()
 {
   signalStrength=$(awk 'NR==3 { print substr($3, 1, length($3)-1)}' /proc/net/wireless)
-	final=$(echo $isEthernet | awk '{print $1}')
 
 	if ! is_wifi;
 	then
         echo %{F$COLOR_FOCUSED_DESKTOP_FG}" "
-        elif [ "$signalStrength" -gt 64 ]
-        then
-                echo %{F$COLOR_FOCUSED_DESKTOP_FG}"▁▃▅▇"
-        elif [ "$signalStrength" -lt 65 ] && [ "$signalStrength" -gt 39 ]
-        then
-                echo %{F$COLOR_FOCUSED_DESKTOP_FG}"▁▃▅"$DARKGREY"▇"%{F$COLOR_FOCUSED_DESKTOP_FG}
-        elif [ "$signalStrength" -lt 40 ]
-        then
-                echo %{F$COLOR_FOCUSED_DESKTOP_FG}"▁▃"$DARKGREY"▅▇"%{F$COLOR_FOCUSED_DESKTOP_FG}
+        
         else
-                echo $DARKGREY""%{F$COLOR_FOCUSED_DESKTOP_FG}
-        fi
+        	case $signalStrength in
+        	[6-9]*) echo %{F$COLOR_FOCUSED_DESKTOP_FG}"▁▃▅▇"
+        		;;
+        	[4-5]*) echo echo %{F$COLOR_FOCUSED_DESKTOP_FG}"▁▃▅"$DARKGREY"▇"%{F$COLOR_FOCUSED_DESKTOP_FG}
+        		;;
+        	[1-3]*) echo %{F$COLOR_FOCUSED_DESKTOP_FG}"▁▃"$DARKGREY"▅▇"%{F$COLOR_FOCUSED_DESKTOP_FG}
+        		;;
+        	*) echo $DARKGREY" "
+        		
+        		;;
+        	esac 
+    fi
 }
 
 battery() {
-	BATC=$(cat /sys/class/power_supply/BAT1/capacity)
-	BATS=$(cat /sys/class/power_supply/BAT1/status)
+    BATC=$(cat /sys/class/power_supply/BAT1/capacity)
+    BATS=$(cat /sys/class/power_supply/BAT1/status)
 	if [[ $BATS == "Charging" ]]; then
 		echo " $BATC%"
-	elif [ $BATC -gt 80 ]
-	then
-		echo " $BATC%"
-	elif [ $BATC -gt 50 ]
-	then
-		echo " $BATC%"
 	else 
-		echo "$RED $BATC%%{F$COLOR_FOCUSED_DESKTOP_FG}"
+		case $BATC in
+		100|[7-9]*) echo " $BATC%"
+			
+			;;
+		[4-6]*) echo " $BATC%"
+			
+			;;
+		*) echo "$RED $BATC%%{F$COLOR_FOCUSED_DESKTOP_FG}"
+			
+			;;
+		esac
 	fi
 }
+
 
 clock() {
     date '+%H:%M'
