@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /bin/dash
 #panel script for bspwm using i3 style workspace indicator
 
 #set height and font if unset 
@@ -14,10 +14,11 @@ COLOR_FOCUSED_DESKTOP_FG='#FF1ABB9B'
 COLOR_FOCUSED_DESKTOP_BG="#FF000000"
 COLOR_DESKTOP_FG='#FFF6F9FF'
 COLOR_DESKTOP_BG="#FF000000"
-UPDATE_INTERVAL="2"
+update_interval=3
 EOL
 fi
 export PANEL_FIFO="/tmp/panel-fifo"
+grep -q update_interval $HOME/.limepanelrc || echo 'update_interval="3"' >> $HOME/.limepanelrc
 
 . $HOME/.limepanelrc
 
@@ -35,7 +36,6 @@ done
 
 bspc config top_padding $((panel_height-gap))
 
-[[  $UPDATE_INTERVAL && ${UPDATE_INTERVAL-x} ]] && update_interval=$UPDATE_INTERVAL || update_interval="2"
 menu="%{A:BspwmWindowMenu:} %{A}%{A:BspwmDesktopMenu:} %{A}"
 logo="%{A:dmainmenu.sh &disown:}  %{A}"
 DARKGREY="%{F#FF707880}"
@@ -55,11 +55,11 @@ sigStrength()
         
         else
         	case $signalStrength in
-        	100|[6-9]?) echo %{F$COLOR_FOCUSED_DESKTOP_FG}"▁▃▅▇"
+        	[6-9]*) echo %{F$COLOR_FOCUSED_DESKTOP_FG}"▁▃▅▇"
         		;;
-        	[4-5]?) echo echo %{F$COLOR_FOCUSED_DESKTOP_FG}"▁▃▅"$DARKGREY"▇"%{F$COLOR_FOCUSED_DESKTOP_FG}
+        	[4-5]*) echo %{F$COLOR_FOCUSED_DESKTOP_FG}"▁▃▅"$DARKGREY"▇"%{F$COLOR_FOCUSED_DESKTOP_FG}
         		;;
-        	[1-3]?) echo %{F$COLOR_FOCUSED_DESKTOP_FG}"▁▃"$DARKGREY"▅▇"%{F$COLOR_FOCUSED_DESKTOP_FG}
+        	[1-3]*) echo %{F$COLOR_FOCUSED_DESKTOP_FG}"▁▃"$DARKGREY"▅▇"%{F$COLOR_FOCUSED_DESKTOP_FG}
         		;;
         	*) echo $DARKGREY" "
         		
@@ -71,7 +71,7 @@ sigStrength()
 battery() {
     BATC=$(cat /sys/class/power_supply/BAT1/capacity)
     BATS=$(cat /sys/class/power_supply/BAT1/status)
-	if [[ $BATS == "Charging" ]]; then
+	if [ $BATS == "Charging" ] 2> /dev/null; then
 		echo " $BATC%"
 	else 
 		case $BATC in
@@ -88,20 +88,27 @@ battery() {
 	fi
 }
 
-
 clock() {
     date '+%H:%M'
 }
 
 status()
 {
-while	:; do
+if [ -e /sys/class/power_supply/BAT1/ ]; then
+	while	:; do
 	echo "C%{A:networkmenuplacer.sh ; nmcli_dmenu:}$(sigStrength)%{A} %{A:dbright:}$(battery)%{A}  $(clock)"
 	sleep $update_interval
+done	
+else
+	while	:; do
+	echo "C%{A:networkmenuplacer.sh ; nmcli_dmenu:}$(sigStrength)%{A}  $(clock)"
+	sleep $update_interval
 done
+fi
+
 }
 
-function lime {
+lime() {
  while read -r line ; do
     case $line in
         T*)
@@ -112,7 +119,7 @@ function lime {
             ;;
 	V*)
             volume_infos="${RA}%{F$COLOR_FOCUSED_DESKTOP_FG} ${line#?} "
-            ;;    	    
+            ;;
         W*)
             # bspwm internal state
             desktops=""
