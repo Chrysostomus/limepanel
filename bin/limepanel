@@ -55,11 +55,11 @@ sigStrength()
         
         else
         	case $signalStrength in
-        	[6-9]*) echo %{F$COLOR_FOCUSED_DESKTOP_FG}"▁▃▅▇"
+        	100|[6-9]?) echo %{F$COLOR_FOCUSED_DESKTOP_FG}"▁▃▅▇"
         		;;
-        	[4-5]*) echo echo %{F$COLOR_FOCUSED_DESKTOP_FG}"▁▃▅"$DARKGREY"▇"%{F$COLOR_FOCUSED_DESKTOP_FG}
+        	[4-5]?) echo echo %{F$COLOR_FOCUSED_DESKTOP_FG}"▁▃▅"$DARKGREY"▇"%{F$COLOR_FOCUSED_DESKTOP_FG}
         		;;
-        	[1-3]*) echo %{F$COLOR_FOCUSED_DESKTOP_FG}"▁▃"$DARKGREY"▅▇"%{F$COLOR_FOCUSED_DESKTOP_FG}
+        	[1-3]?) echo %{F$COLOR_FOCUSED_DESKTOP_FG}"▁▃"$DARKGREY"▅▇"%{F$COLOR_FOCUSED_DESKTOP_FG}
         		;;
         	*) echo $DARKGREY" "
         		
