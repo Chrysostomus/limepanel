@@ -61,7 +61,7 @@ sigStrength()
         		;;
         	[1-3]*) echo %{F$COLOR_FOCUSED_DESKTOP_FG}"▁▃"$DARKGREY"▅▇"%{F$COLOR_FOCUSED_DESKTOP_FG}
         		;;
-        	*) echo $DARKGREY" "
+        	*) echo $DARKGREY" "%{F$COLOR_FOCUSED_DESKTOP_FG}
         		
         		;;
         	esac 
