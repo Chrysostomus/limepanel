@@ -47,13 +47,12 @@ is_wifi()
 }
 sigStrength()
 {
-  signalStrength=$(awk 'NR==3 { print substr($3, 1, length($3)-1)}' /proc/net/wireless)
-
 	if ! is_wifi;
 	then
         echo %{F$COLOR_FOCUSED_DESKTOP_FG}" "
         
         else
+        signalStrength=$(awk 'NR==3 {print $3}' /proc/net/wireless)
         	case $signalStrength in
         	[6-9]*) echo %{F$COLOR_FOCUSED_DESKTOP_FG}"▁▃▅▇"
         		;;
@@ -71,7 +70,7 @@ sigStrength()
 battery() {
     BATC=$(cat /sys/class/power_supply/BAT1/capacity)
     BATS=$(cat /sys/class/power_supply/BAT1/status)
-	if [ $BATS == "Charging" ] 2> /dev/null; then
+	if [ "$BATS" = "Charging" ]; then
 		echo " $BATC%"
 	else 
 		case $BATC in
