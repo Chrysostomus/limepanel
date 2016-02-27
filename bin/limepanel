@@ -4,7 +4,7 @@
 #set height and font if unset 
 
 if ! [ -f "$HOME/.limepanelrc" ]; then
-	cat > $HOME/.limepanelrc <<EOL
+	cat > "$HOME"/.limepanelrc <<EOL
 panel_height='25'
 mainfont='-zevv-*-*-*-*-*-20-*-*-*-*-*-*-*'
 iconfont="-*-ionicons-medium-r-normal-*-25-*-*-*-p-*-*-1"
@@ -18,9 +18,9 @@ update_interval=3
 EOL
 fi
 export PANEL_FIFO="/tmp/panel-fifo"
-grep -q update_interval $HOME/.limepanelrc || echo 'update_interval="3"' >> $HOME/.limepanelrc
+grep -q update_interval "$HOME"/.limepanelrc || echo 'update_interval="3"' >> "$HOME"/.limepanelrc
 
-. $HOME/.limepanelrc
+. "$HOME"/.limepanelrc
 
 # Kill any panel processes older than us, instead of bailing like the example
 # does. That caused one too many panel-less boots for me.
@@ -37,13 +37,13 @@ done
 bspc config top_padding $((panel_height-gap))
 
 menu="%{A:BspwmWindowMenu:} %{A}%{A:BspwmDesktopMenu:} %{A}"
-logo="%{A:dmainmenu.sh &disown:}  %{A}"
+logo="%{A:dmainmenu.sh:}  %{A}"
 DARKGREY="%{F#FF707880}"
 RED="%{F#FFA54242}"
 interface_up=$(ip link show | awk '/state UP/ {print substr($2, 1, length($2)-1)}')
 is_wifi()
 {
-	iwconfig $interface_up >/dev/null 2>&1
+	iwconfig "$interface_up" >/dev/null 2>&1
 }
 sigStrength()
 {
@@ -53,14 +53,14 @@ sigStrength()
         
         else
         signalStrength=$(awk 'NR==3 {print $3}' /proc/net/wireless)
-        	case $signalStrength in
+        	case "$signalStrength" in
         	[6-9]*) echo %{F$COLOR_FOCUSED_DESKTOP_FG}"▁▃▅▇"
         		;;
-        	[4-5]*) echo %{F$COLOR_FOCUSED_DESKTOP_FG}"▁▃▅"$DARKGREY"▇"%{F$COLOR_FOCUSED_DESKTOP_FG}
+        	[4-5]*) echo %{F$COLOR_FOCUSED_DESKTOP_FG}"▁▃▅""$DARKGREY""▇"%{F$COLOR_FOCUSED_DESKTOP_FG}
         		;;
-        	[1-3]*) echo %{F$COLOR_FOCUSED_DESKTOP_FG}"▁▃"$DARKGREY"▅▇"%{F$COLOR_FOCUSED_DESKTOP_FG}
+        	[1-3]*) echo %{F$COLOR_FOCUSED_DESKTOP_FG}"▁▃""$DARKGREY""▅▇"%{F$COLOR_FOCUSED_DESKTOP_FG}
         		;;
-        	*) echo $DARKGREY" "%{F$COLOR_FOCUSED_DESKTOP_FG}
+        	*) echo "$DARKGREY"" "%{F$COLOR_FOCUSED_DESKTOP_FG}
         		
         		;;
         	esac 
@@ -73,7 +73,7 @@ battery() {
 	if [ "$BATS" = "Charging" ]; then
 		echo " $BATC%"
 	else 
-		case $BATC in
+		case "$BATC" in
 		100|[7-9]*) echo " $BATC%"
 			
 			;;
@@ -96,12 +96,12 @@ status()
 if [ -e /sys/class/power_supply/BAT1/ ]; then
 	while	:; do
 	echo "C%{A:networkmenuplacer.sh ; nmcli_dmenu:}$(sigStrength)%{A} %{A:dbright:}$(battery)%{A}  $(clock)"
-	sleep $update_interval
+	sleep "$update_interval"
 done	
 else
 	while	:; do
 	echo "C%{A:networkmenuplacer.sh ; nmcli_dmenu:}$(sigStrength)%{A}  $(clock)"
-	sleep $update_interval
+	sleep "$update_interval"
 done
 fi
 
@@ -109,7 +109,7 @@ fi
 
 lime() {
  while read -r line ; do
-    case $line in
+    case "$line" in
         T*)
             title="%{A:MonocleSwitcher:}${line#?}%{A}"
             ;;
@@ -152,7 +152,7 @@ lime() {
 # Rename monitors to numbers
 i=1
 for monitor in $(bspc query -M); do
-    bspc monitor $monitor \
+    bspc monitor "$monitor" \
         -n "$i" \
     let i++
 done
