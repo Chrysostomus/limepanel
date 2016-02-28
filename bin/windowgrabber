@@ -3,7 +3,7 @@
 # edited beyound recognition
 
 follower() {
-while [[ $(pgrep -cx bspwm_window_move.sh) = 1 ]] ; do
+while [ "$(pgrep -cx windowgrabber)" = 1 ] ; do
 	bspc config pointer_follows_focus false
 done
 }
