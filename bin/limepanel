@@ -40,9 +40,10 @@ menu="%{A:BspwmWindowMenu:} %{A}%{A:BspwmDesktopMenu:} %{A}"
 logo="%{A:dmainmenu.sh:}  %{A}"
 DARKGREY="%{F#FF707880}"
 RED="%{F#FFA54242}"
-interface_up=$(ip link show | awk '/state UP/ {print substr($2, 1, length($2)-1)}')
+
 is_wifi()
 {
+	interface_up=$(ip link show | awk '/state UP/ {print substr($2, 1, length($2)-1)}')
 	iwconfig "$interface_up" >/dev/null 2>&1
 }
 sigStrength()
