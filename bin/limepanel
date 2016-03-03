@@ -34,7 +34,7 @@ done
 
 #trap 'trap - TERM; kill 0' INT TERM QUIT EXIT
 
-bspc config top_padding $((panel_height-gap))
+#bspc config top_padding $((panel_height-gap))
 
 menu="%{A:BspwmWindowMenu:} %{A}%{A:BspwmDesktopMenu:} %{A}"
 logo="%{A:dmainmenu.sh:}  %{A}"
