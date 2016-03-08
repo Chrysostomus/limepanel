@@ -10,6 +10,7 @@ mainfont='-zevv-*-*-*-*-*-20-*-*-*-*-*-*-*'
 iconfont="-*-ionicons-medium-r-normal-*-25-*-*-*-p-*-*-1"
 powerlinefont='dejavu sans mono for Powerline :size=12 :style=regular'
 gap=15
+main_menu="mygtkmenui -- .config/GTKmenu/MainMenu"
 COLOR_FOCUSED_DESKTOP_FG='#FF1ABB9B'
 COLOR_FOCUSED_DESKTOP_BG="#FF000000"
 COLOR_DESKTOP_FG='#FFF6F9FF'
@@ -37,7 +38,7 @@ done
 #bspc config top_padding $((panel_height-gap))
 
 menu="%{A:BspwmWindowMenu:} %{A}%{A:BspwmDesktopMenu:} %{A}"
-logo="%{A:dmainmenu.sh:}  %{A}"
+logo="%{A:$main_menu:}  %{A}"
 DARKGREY="%{F#FF707880}"
 RED="%{F#FFA54242}"
 
