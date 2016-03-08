@@ -20,7 +20,7 @@ EOL
 fi
 export PANEL_FIFO="/tmp/panel-fifo"
 grep -q update_interval "$HOME"/.limepanelrc || echo 'update_interval="3"' >> "$HOME"/.limepanelrc
-grep -q main_menu "$HOME"/.limepanelrc || echo 'main_menu="mygtkmenui -- .config/GTKmenu/MainMenu"' >> "$HOME"/.limepanelrc
+grep -q main_menu "$HOME"/.limepanelrc || echo 'main_menu="dmainmenu.sh"' >> "$HOME"/.limepanelrc
 . "$HOME"/.limepanelrc
 
 # Kill any panel processes older than us, instead of bailing like the example
