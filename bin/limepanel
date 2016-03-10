@@ -1,6 +1,15 @@
 #! /bin/dash
 #panel script for bspwm using i3 style workspace indicator
 
+# Kill any panel processes older than us, instead of bailing like the example
+# does. That caused one too many panel-less boots for me.
+
+while [ $(pgrep -cx limepanel) -gt 1 -o $(pgrep -cx lemonbar) -gt 1 ] ; do
+	pkill -ox -9 limepanel
+	pkill -ox -9 lemonbar
+	killall -9 stalonetray
+	killall -9 xtitle
+done
 #set height and font if unset 
 
 if ! [ -f "$HOME/.limepanelrc" ]; then
@@ -23,15 +32,7 @@ grep -q update_interval "$HOME"/.limepanelrc || echo 'update_interval="3"' >> "$
 grep -q main_menu "$HOME"/.limepanelrc || echo 'main_menu="dmainmenu.sh"' >> "$HOME"/.limepanelrc
 . "$HOME"/.limepanelrc
 
-# Kill any panel processes older than us, instead of bailing like the example
-# does. That caused one too many panel-less boots for me.
 
-while [ $(pgrep -cx limepanel) -gt 1 -o $(pgrep -cx lemonbar) -gt 1 ] ; do
-	pkill -ox -9 limepanel
-	pkill -ox -9 lemonbar
-	killall -9 stalonetray
-	killall -9 xtitle
-done
 
 #trap 'trap - TERM; kill 0' INT TERM QUIT EXIT
 
