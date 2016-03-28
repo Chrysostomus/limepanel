@@ -34,7 +34,7 @@ grep -q main_menu "$HOME"/.limepanelrc || echo 'main_menu="dmainmenu.sh"' >> "$H
 
 
 
-#trap 'trap - TERM; kill 0' INT TERM QUIT EXIT
+trap 'rm /tmp/panel-fifo1' INT TERM QUIT EXIT
 
 #bspc config top_padding $((panel_height-gap))
 
