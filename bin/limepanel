@@ -17,7 +17,7 @@ if ! [ -f "$HOME/.limepanelrc" ]; then
 panel_height='25'
 mainfont='-zevv-*-*-*-*-*-20-*-*-*-*-*-*-*'
 iconfont="-*-ionicons-medium-r-normal-*-25-*-*-*-p-*-*-1"
-powerlinefont='dejavu sans mono for Powerline :size=12 :style=regular'
+powerlinefont='dejavu sans mono for Powerline:size=12:style=regular'
 gap=15
 main_menu="mygtkmenui -- .config/GTKmenu/MainMenu"
 COLOR_FOCUSED_DESKTOP_FG='#FF1ABB9B'
@@ -34,7 +34,7 @@ grep -q main_menu "$HOME"/.limepanelrc || echo 'main_menu="dmainmenu.sh"' >> "$H
 
 
 
-trap 'rm /tmp/panel-fifo1' INT TERM QUIT EXIT
+#trap 'rm /tmp/panel-fifo1' INT TERM QUIT EXIT
 
 #bspc config top_padding $((panel_height-gap))
 
@@ -157,17 +157,17 @@ lime() {
  done
 }
 
-# Rename monitors to numbers
+## Rename monitors to numbers
+#i=1
+#for monitor in $(bspc query -M); do
+#    bspc monitor "$monitor" \
+#        -n "$i" \
+#    let i++
+#done
+#unset i
+
 i=1
-for monitor in $(bspc query -M); do
-    bspc monitor "$monitor" \
-        -n "$i" \
-    let i++
-done
-unset i
-
-
-for i in $(bspc query -M); do
+#for i in $(bspc query -M); do
 	# Remove old fifos and create new ones
 	[ -e "$PANEL_FIFO$i" ] && rm "$PANEL_FIFO$i"
 	mkfifo "$PANEL_FIFO$i"
@@ -192,5 +192,5 @@ for i in $(bspc query -M); do
 		-F $COLOR_FOCUSED_DESKTOP_FG \
 		-B $COLOR_DESKTOP_BG \
 		| while read line; do eval "$line"; done &
-done
+#done
 wait
