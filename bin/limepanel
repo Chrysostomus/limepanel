@@ -172,10 +172,7 @@ for i in $(bspc query -M); do
 	[ -e "$PANEL_FIFO$i" ] && rm "$PANEL_FIFO$i"
 	mkfifo "$PANEL_FIFO$i"
 	# Wm infos of specific monitor
-	bspc subscribe |\
-        grep -oE "[Mm]$i[^TM]*[TML]" --line-buffered |\
-        while read line; do echo W$line; done \
-            > "$PANEL_FIFO$i" &
+	bspc subscribe > "$PANEL_FIFO$i" &
 	# Title
 	xtitle -t 80 -sf 'T%s' > "$PANEL_FIFO$i" &
 	# conky infos
