@@ -103,7 +103,7 @@ status()
 {
 if [ -e /sys/class/power_supply/BAT1/ ]; then
 	while	:; do
-	echo "C%{A:networkmenuplacer.sh ; nmcli_dmenu:}$(sigStrength)%{A} %{A:dbright:}$(battery)%{A}  $(clock)"
+	echo "C%{A:networkmenu.sh:}$(sigStrength)%{A} %{A:dbright:}$(battery)%{A}  $(clock)"
 	sleep "$update_interval"
 done	
 else
