@@ -174,7 +174,7 @@ i=1
 	# Wm infos of specific monitor
 	sleep 1 && bspc subscribe > "$PANEL_FIFO$i" || sleep 2 && bspc subscribe > "$PANEL_FIFO$i"&
 	# Title
-	xtitle -t 80 -sf 'T%s' > "$PANEL_FIFO$i" &
+	xtitle -sf 'T%s\n' -t 80 > "$PANEL_FIFO$i" &
 	# conky infos
 #	[ $(pgrep -cx conky) -lt 1 ] && conky -c ~/.config/bspwm/panel/conkyrc > /tmp/panel-fifo$i &
 	#status
