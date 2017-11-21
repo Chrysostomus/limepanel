@@ -39,6 +39,7 @@ grep -q main_menu "$HOME"/.limepanelrc || echo 'main_menu="dmainmenu.sh"' >> "$H
 #bspc config top_padding $((panel_height-gap))
 
 menu="%{A:BspwmWindowMenu:} %{A}%{A:BspwmDesktopMenu:} %{A}"
+window_button="%{A:bspc node -c:} %{A}"
 logo="%{A:$main_menu:}  %{A}"
 DARKGREY="%{F#FF707880}"
 RED="%{F#FFA54242}"
@@ -153,7 +154,7 @@ lime() {
             done
             ;;
     esac
-    printf "%s\n" "%{l}${logo}${desktops}${layout}%{F$COLOR_DESKTOP_FG}%{c}${title}%{r}%{F$COLOR_FOCUSED_DESKTOP_FG}$menu$volume_infos${conky_infos}"
+    printf "%s\n" "%{l}${logo}${desktops}${layout}%{F$COLOR_DESKTOP_FG}%{c}${title}%{r}%{F$COLOR_FOCUSED_DESKTOP_FG}${window_button}$volume_infos${conky_infos}"
  done
 }
 
