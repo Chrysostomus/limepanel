@@ -192,6 +192,7 @@ i=1
 		-o -3 -f "$powerlinefont" \
 		-F $COLOR_FOCUSED_DESKTOP_FG \
 		-B $COLOR_DESKTOP_BG \
+		-a 30
 		| while read line; do eval "$line"; done &
 #done
 wait
