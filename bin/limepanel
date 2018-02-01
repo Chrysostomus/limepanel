@@ -16,14 +16,14 @@ if ! [ -f "$HOME/.limepanelrc" ]; then
 	cat > "$HOME"/.limepanelrc <<EOL
 panel_height='25'
 mainfont='-zevv-*-*-*-*-*-20-*-*-*-*-*-*-*'
-iconfont="-*-ionicons-medium-r-normal-*-25-*-*-*-p-*-*-1"
+iconfont="Ionicons:size=18:antialias=true"
 powerlinefont='dejavu sans mono for Powerline:size=12:style=regular'
 gap=15
 main_menu="mygtkmenui -- .config/GTKmenu/MainMenu"
 COLOR_FOCUSED_DESKTOP_FG='#FF1ABB9B'
-COLOR_FOCUSED_DESKTOP_BG="#FF000000"
+COLOR_FOCUSED_DESKTOP_BG="#FF292f34"
 COLOR_DESKTOP_FG='#FFF6F9FF'
-COLOR_DESKTOP_BG="#FF000000"
+COLOR_DESKTOP_BG="#FF292f34"
 update_interval=3
 EOL
 fi
@@ -39,6 +39,7 @@ grep -q main_menu "$HOME"/.limepanelrc || echo 'main_menu="dmainmenu.sh"' >> "$H
 #bspc config top_padding $((panel_height-gap))
 
 menu="%{A:BspwmWindowMenu:} %{A}%{A:BspwmDesktopMenu:} %{A}"
+window_button="%{A:bspc node -c:} %{A}"
 logo="%{A:$main_menu:}  %{A}"
 DARKGREY="%{F#FF707880}"
 RED="%{F#FFA54242}"
@@ -153,7 +154,7 @@ lime() {
             done
             ;;
     esac
-    printf "%s\n" "%{l}${logo}${desktops}${layout}%{F$COLOR_DESKTOP_FG}%{c}${title}%{r}%{F$COLOR_FOCUSED_DESKTOP_FG}$menu$volume_infos${conky_infos}"
+    printf "%s\n" "%{l}${logo}${desktops}${layout}%{F$COLOR_DESKTOP_FG}%{c}${title}%{r}%{F$COLOR_FOCUSED_DESKTOP_FG}${window_button}$volume_infos${conky_infos}"
  done
 }
 
@@ -186,11 +187,12 @@ i=1
 		| lime \
 		| lemonbar \
 		-g x$panel_height \
-		-f "$mainfont" -o -1 \
+		-f "$mainfont" -o -3 \
 		-f "$iconfont" -o 0 \
-		-o -3 -f "$powerlinefont" \
+		-o -5 -f "$powerlinefont" \
 		-F $COLOR_FOCUSED_DESKTOP_FG \
 		-B $COLOR_DESKTOP_BG \
+		-a 30 \
 		| while read line; do eval "$line"; done &
 #done
 wait
