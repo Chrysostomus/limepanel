@@ -1,49 +1,55 @@
 #! /bin/dash
 #panel script for bspwm using i3 style workspace indicator
 
-# Kill any panel processes older than us, instead of bailing like the example
-# does. That caused one too many panel-less boots for me.
-
-while [ $(pgrep -cx limepanel) -gt 1 -o $(pgrep -cx lemonbar) -gt 1 ] ; do
-	pkill -ox -9 limepanel
-	pkill -ox -9 lemonbar
-	killall -9 stalonetray
-	killall -9 xtitle
-done
 #set height and font if unset 
 
-if ! [ -f "$HOME/.limepanelrc" ]; then
+if ! [ -f "$HOME/.limepanelrc" ] || ! grep -q "TerminessTTF Nerd Font" "$HOME/.limepanelrc"; then
 	cat > "$HOME"/.limepanelrc <<EOL
 panel_height='25'
-mainfont='-zevv-*-*-*-*-*-20-*-*-*-*-*-*-*'
-iconfont="Ionicons:size=18:antialias=true"
-powerlinefont='dejavu sans mono for Powerline:size=12:style=regular'
+mainfont='-*-terminus-medium-*-*-*-18-*-*-*-*-*-*-*'
+iconfont="TerminessTTF Nerd Font:size=14:antialias=true"
 gap=15
 main_menu="mygtkmenui -- .config/GTKmenu/MainMenu"
+networkmenu="networkmenu.sh"
+wifi_indicator=true
+window_button="%{A:bspc node -c:} %{A}"
+menu_icon=
+charging_icon=
+battery_full_icon=
+battery_draining_icon=
+battery_half_icon=
+battery_low_icon=
+time_icon=
+wired_icon="<->"
+disconnected_icon=
+title_length=80
 COLOR_FOCUSED_DESKTOP_FG='#FF1ABB9B'
 COLOR_FOCUSED_DESKTOP_BG="#FF292f34"
 COLOR_DESKTOP_FG='#FFF6F9FF'
 COLOR_DESKTOP_BG="#FF292f34"
-update_interval=3
-EOL
-fi
-export PANEL_FIFO="/tmp/panel-fifo"
-grep -q update_interval "$HOME"/.limepanelrc || echo 'update_interval="3"' >> "$HOME"/.limepanelrc
-grep -q main_menu "$HOME"/.limepanelrc || echo 'main_menu="dmainmenu.sh"' >> "$HOME"/.limepanelrc
-. "$HOME"/.limepanelrc
-
-
-
-#trap 'rm /tmp/panel-fifo1' INT TERM QUIT EXIT
-
-#bspc config top_padding $((panel_height-gap))
-
-menu="%{A:BspwmWindowMenu:} %{A}%{A:BspwmDesktopMenu:} %{A}"
-window_button="%{A:bspc node -c:} %{A}"
-logo="%{A:$main_menu:}  %{A}"
 DARKGREY="%{F#FF707880}"
 RED="%{F#FFA54242}"
+update_interval=3
+systemtray=0
+EOL
+fi
 
+. "$HOME"/.limepanelrc
+
+# Kill any panel processes older than us, instead of bailing like the example
+# does. That caused one too many panel-less boots for me.
+
+while [ $(pgrep -cx simplepanel) -gt 1 ] ; do pkill -ox -9 limepanel ; done ;
+while [ $(pgrep -cx lemonbar) -gt 0 ] ; do pkill -ox -9 lemonbar ; done ;
+while [ $(pgrep -cx xtitle) -gt 0 ] ; do pkill -ox -9 xtitle ; done ;
+while [ $(pgrep -cx bspc) -gt 0 ] ; do pkill -ox -9 bspc ; done ;
+while [ $(pgrep -cx stalonetray) -gt 0 ] ; do pkill -ox -9 stalonetray ; done ;
+
+
+trap '[ -e /tmp/panel-fifo1 ] && rm /tmp/panel-fifo1' INT TERM QUIT EXIT
+
+#bspc config top_padding $((panel_height-gap))
+logo="%{A:$main_menu:} $menu_icon %{A}"
 is_wifi()
 {
 	interface_up=$(ip link show | awk '/state UP/ {print substr($2, 1, length($2)-1)}')
@@ -55,7 +61,7 @@ if ip link show | grep -q 'state UP';
 	then
 	if ! is_wifi;
 	then
-        echo %{F$COLOR_FOCUSED_DESKTOP_FG}" "
+        echo %{F$COLOR_FOCUSED_DESKTOP_FG}$wired_icon
         
         else
         signalStrength=$(awk 'NR==3 {print $3}' /proc/net/wireless)
@@ -66,13 +72,13 @@ if ip link show | grep -q 'state UP';
         		;;
         	[1-3]*) echo %{F$COLOR_FOCUSED_DESKTOP_FG}"▁▃""$DARKGREY""▅▇"%{F$COLOR_FOCUSED_DESKTOP_FG}
         		;;
-        	*) echo "$DARKGREY"" "%{F$COLOR_FOCUSED_DESKTOP_FG}
+        	*) echo "$DARKGREY""▁▃▅▇ "%{F$COLOR_FOCUSED_DESKTOP_FG}
         		
         		;;
         	esac 
     fi
   else
-		echo "$DARKGREY"" "%{F$COLOR_FOCUSED_DESKTOP_FG}
+		echo "$DARKGREY$disconnected_icon"%{F$COLOR_FOCUSED_DESKTOP_FG}
 fi
 }
 
@@ -80,16 +86,20 @@ battery() {
     BATC=$(cat /sys/class/power_supply/BAT*/capacity)
     BATS=$(cat /sys/class/power_supply/BAT*/status)
 	if [ "$BATS" = "Charging" ]; then
-		echo " $BATC%"
+		echo "$charging_icon $BATC%"
 	else 
 		case "$BATC" in
-		100|[7-9]*) echo " $BATC%"
+		100|9*) echo "$battery_full_icon $BATC%"
 			
 			;;
-		[4-6]*) echo " $BATC%"
+		100|[7-8]*) echo "$battery_draining_icon $BATC%"
 			
 			;;
-		*) echo "$RED $BATC%%{F$COLOR_FOCUSED_DESKTOP_FG}"
+
+		[4-6]*) echo "$battery_half_icon $BATC%"
+			
+			;;
+		*) echo "$RED$battery_low_icon $BATC%%{F$COLOR_FOCUSED_DESKTOP_FG}"
 			
 			;;
 		esac
@@ -103,15 +113,29 @@ clock() {
 status()
 {
 if [ -e /sys/class/power_supply/BAT*/ ]; then
-	while	:; do
-	echo "C%{A:networkmenu.sh:}$(sigStrength)%{A} %{A:dbright:}$(battery)%{A}  $(clock)"
-	sleep "$update_interval"
-done	
+	if [ "$wifi_indicator" = true ]; then
+		while	:; do
+		echo "C%{A:"$networkmenu":}$(sigStrength)%{A}  %{A:dbright:}$(battery)%{A} $time_icon $(clock)"
+		sleep "$update_interval"
+		done
+	else
+		while	:; do
+		echo "C%{A:dbright:}$(battery)%{A} $time_icon $(clock)"
+		sleep "$update_interval"
+		done
+	fi
 else
-	while	:; do
-	echo "C%{A:networkmenu.sh:}$(sigStrength)%{A}  $(clock)"
-	sleep "$update_interval"
-done
+	if [ "$wifi_indicator" = true ]; then
+		while	:; do
+		echo "C%{A:"$networkmenu":}$(sigStrength)%{A} $time_icon $(clock)"
+		sleep "$update_interval"
+		done
+	else
+		while	:; do
+		echo "C$time_icon $(clock)"
+		sleep "$update_interval"
+		done
+	fi
 fi
 
 }
@@ -158,38 +182,41 @@ lime() {
  done
 }
 
-## Rename monitors to numbers
-#i=1
-#for monitor in $(bspc query -M); do
-#    bspc monitor "$monitor" \
-#        -n "$i" \
-#    let i++
-#done
-#unset i
-
 i=1
-#for i in $(bspc query -M); do
 	# Remove old fifos and create new ones
 	[ -e "$PANEL_FIFO$i" ] && rm "$PANEL_FIFO$i"
 	mkfifo "$PANEL_FIFO$i"
 	# Wm infos of specific monitor
-	sleep 1 && bspc subscribe > "$PANEL_FIFO$i" || sleep 2 && bspc subscribe > "$PANEL_FIFO$i"&
+	bspc subscribe > "$PANEL_FIFO$i" &
 	# Title
-	xtitle -sf 'T%s\n' -t 80 > "$PANEL_FIFO$i" &
-	# conky infos
-#	[ $(pgrep -cx conky) -lt 1 ] && conky -c ~/.config/bspwm/panel/conkyrc > /tmp/panel-fifo$i &
-	#status
+	xtitle -sf 'T%s\n' -t $title_length > "$PANEL_FIFO$i" &
+	# system tray
+	if [ "$systemtray" -eq 1 ]; then
+		# If there is no configuration, add one
+		[ ~/.stalonetrayrc ] || cp /usr/share/limepanel/stalonetrayrc ~/.stalonetrayrc
+		# Set height to match the panel
+		sed -i "s/^icon_size .*/icon_size $PANEL_HEIGHT/" ~/.stalonetrayrc
+		sed -i "s/^max_geometry.*/max_geometry 0x$PANEL_HEIGHT/" ~/.stalonetrayrc
+		# Try to set position based on the resolution
+		if [ -z $tray_pos ]; then
+			monitor_widht=$(wattr w $(lsw -r))
+			tray_pos=$((1600 + $monitor_widht - 1920 ))
+			echo 'tray_pos=1600' >> ~/.limepanelrc
+			sed -i "s/^geometry .*/geometry 1x1+$tray_pos+0/" ~/.stalonetrayrc
+		fi
+		sleep 1 && stalonetray &
+	fi
+	# status
 	status > /tmp/panel-fifo$i &
 	# Volume-infos
 	volume_status.sh &
 	# Pipe all the info to lemonbar
-	cat $PANEL_FIFO$i $PANEL_FIFO \
+	cat $PANEL_FIFO$i \
 		| lime \
 		| lemonbar \
 		-g x$panel_height \
-		-f "$mainfont" -o -3 \
-		-f "$iconfont" -o 0 \
-		-o -5 -f "$powerlinefont" \
+		-f "$mainfont" \
+		-f "$iconfont" \
 		-F $COLOR_FOCUSED_DESKTOP_FG \
 		-B $COLOR_DESKTOP_BG \
 		-a 30 \
