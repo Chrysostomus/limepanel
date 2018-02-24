@@ -8,7 +8,7 @@ if ! [ -f "$HOME/.limepanelrc" ] || ! grep -q "TerminessTTF Nerd Font" "$HOME/.l
 panel_height='25'
 mainfont='-*-terminus-medium-*-*-*-18-*-*-*-*-*-*-*'
 iconfont="TerminessTTF Nerd Font:size=14:antialias=true"
-gap=15
+gap=\$(awk -F"=" '/gap=/ {print \$2}' ~/.config/bspwm/bspwmrc)
 main_menu="mygtkmenui -- .config/GTKmenu/MainMenu"
 networkmenu="networkmenu.sh"
 wifi_indicator=true
@@ -48,7 +48,8 @@ while [ $(pgrep -cx stalonetray) -gt 0 ] ; do pkill -ox -9 stalonetray ; done ;
 
 trap '[ -e /tmp/panel-fifo1 ] && rm /tmp/panel-fifo1' INT TERM QUIT EXIT
 
-#bspc config top_padding $((panel_height-gap))
+sleep 2 && bspc config top_padding $((panel_height-gap)) &
+
 logo="%{A:$main_menu:} $menu_icon %{A}"
 is_wifi()
 {
