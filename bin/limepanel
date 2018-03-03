@@ -90,7 +90,7 @@ battery() {
 		echo "$charging_icon $BATC%"
 	else 
 		case "$BATC" in
-		100|9*) echo "$battery_full_icon $BATC%"
+		1??|9*) echo "$battery_full_icon $BATC%"
 			
 			;;
 		100|[7-8]*) echo "$battery_draining_icon $BATC%"
