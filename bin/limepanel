@@ -9,7 +9,7 @@ if ! [ -f "$HOME/.limepanelrc" ] || ! grep -q "TerminessTTF Nerd Font" "$HOME/.l
 panel_height='25'
 mainfont='-*-terminus-medium-*-*-*-18-*-*-*-*-*-*-*'
 iconfont="TerminessTTF Nerd Font:size=14:antialias=true"
-#iconfont="Ionicons:size=16:antialias=true"
+thirdfont="Ionicons:size=16:antialias=true"
 gap=\$(awk -F"=" '/gap=/ {print \$2}' ~/.config/bspwm/bspwmrc)
 main_menu="mygtkmenui -- .config/GTKmenu/MainMenu"
 networkmenu="networkmenu.sh"
@@ -39,7 +39,9 @@ update_interval=3
 systemtray=0
 EOL
 fi
-
+SP="%{O4}"
+#SEPARATOR="$FC1 ▏$FC"
+SEPARATOR="$SP${DARKGREY}%{R}%{O1}%{R}${FC}$SP"
 . "$HOME"/.limepanelrc
 
 # Kill any panel processes older than us, instead of bailing like the example
@@ -170,11 +172,11 @@ lime() {
                 case $item in
                     # always show focused desktops
                     O*|F*|U*)
-                        desktops="${desktops}%{F$COLOR_FOCUSED_DESKTOP_FG}%{B$COLOR_FOCUSED_DESKTOP_BG}%{U"$COLOR_FOCUSED_DESKTOP_FG"}%{+u}${name}%{-u} %{B-}%{F-}"
+                        desktops="${desktops}%{F$COLOR_FOCUSED_DESKTOP_FG}%{B$COLOR_FOCUSED_DESKTOP_BG}%{U"$COLOR_FOCUSED_DESKTOP_FG"}%{+u}${name}%{-u}$SP%{B-}%{F-}"
                         ;;
                     # show used unfocused (hide free unused)
                     o*|u*)#f*
-                        desktops="${desktops}%{F$COLOR_DESKTOP_FG}%{B$COLOR_DESKTOP_BG}%{A:bspc desktop -f ${name}:}${name}%{A}%{B-} %{F-}"
+                        desktops="${desktops}%{F$COLOR_DESKTOP_FG}%{B$COLOR_DESKTOP_BG}%{A:bspc desktop -f ${name}:}${name}%{A}%{B-}$SP%{F-}"
                         ;;
                     L*)
                     # layout
@@ -224,6 +226,7 @@ i=1
 		-g x$panel_height \
 		-f "$mainfont" \
 		-f "$iconfont" \
+		-f "$thirdfont" \
 		-F $COLOR_FOCUSED_DESKTOP_FG \
 		-B $COLOR_DESKTOP_BG \
 		-a 30 \
