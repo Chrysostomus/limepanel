@@ -8,9 +8,10 @@ if ! [ -f "$HOME/.limepanelrc" ] || ! grep -q "TerminessTTF Nerd Font" "$HOME/.l
 #ionicons         
 panel_height='25'
 mainfont='-*-terminus-medium-*-*-*-18-*-*-*-*-*-*-*'
-iconfont="TerminessTTF Nerd Font:size=14:antialias=true"
-thirdfont="Ionicons:size=16:antialias=true"
-gap=\$(awk -F"=" '/gap=/ {print \$2}' ~/.config/bspwm/bspwmrc)
+iconfont="font\-logos:size=15:antialias=true"
+thirdfont="TerminessTTF Nerd Font:size=14:antialias=true"
+#thirdfont="Ionicons:size=16:antialias=true"
+gap=$(awk -F"=" '/gap=/ {print $2}' ~/.config/bspwm/bspwmrc)
 main_menu="mygtkmenui -- .config/GTKmenu/MainMenu"
 networkmenu="networkmenu.sh"
 wifi_indicator=true
@@ -30,6 +31,8 @@ disconnected_icon=
 muted_icon=
 #
 unmuted_icon=
+tiling_icon=
+monocle_icon=
 title_length=80
 COLOR_FOCUSED_DESKTOP_FG='#FF1ABB9B'
 COLOR_FOCUSED_DESKTOP_BG="#FF292f34"
