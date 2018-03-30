@@ -32,7 +32,11 @@ muted_icon=
 #
 unmuted_icon=
 tiling_icon=
+<<<<<<< HEAD
 monocle_icon=
+=======
+monocle_icon=
+>>>>>>> 101361904fa8807db7904ba465140e8d733dd2f4
 title_length=80
 COLOR_FOCUSED_DESKTOP_FG='#FF1ABB9B'
 COLOR_FOCUSED_DESKTOP_BG="#FF292f34"
