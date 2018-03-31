@@ -61,7 +61,6 @@ while [ $(pgrep -cx stalonetray) -gt 0 ] ; do pkill -ox -9 stalonetray ; done ;
 
 trap '[ -e /tmp/panel-fifo1 ] && rm /tmp/panel-fifo1' INT TERM QUIT EXIT
 
-sleep 2 && bspc config top_padding $((panel_height-gap)) &
 
 logo="%{A:$main_menu:} $menu_icon %{A}"
 is_wifi()
@@ -222,8 +221,12 @@ i=1
 			tray_pos=$((1600 + $monitor_widht - 1920 ))
 			echo 'tray_pos=1600' >> ~/.limepanelrc
 			sed -i "s/^geometry .*/geometry 1x1+$tray_pos+0/" ~/.stalonetrayrc
+		else
+			sed -i "s/^geometry .*/geometry 1x1+$tray_pos+0/" ~/.stalonetrayrc
 		fi
-		sleep 1 && stalonetray &
+		sleep 0.2 && stalonetray &
+		sleep 0.3 && bspc config top_padding $((panel_height-gap)) &
+		
 	fi
 	# status
 	status > /tmp/panel-fifo$i &
@@ -233,6 +236,7 @@ i=1
 	cat $PANEL_FIFO$i \
 		| lime \
 		| lemonbar \
+		-d \
 		-g x$panel_height \
 		-f "$mainfont" \
 		-f "$iconfont" \
