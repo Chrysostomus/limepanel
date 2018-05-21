@@ -3,22 +3,20 @@
 
 #set height and font if unset 
 
-if ! [ -f "$HOME/.limepanelrc" ] || ! grep -q "TerminessTTF Nerd Font" "$HOME/.limepanelrc"; then
+if ! [ -f "$HOME/.limepanelrc" ]; then
 	cat > "$HOME"/.limepanelrc <<EOL
 #ionicons         
 panel_height='25'
 mainfont='-*-terminus-medium-*-*-*-18-*-*-*-*-*-*-*'
-iconfont="font\-logos:size=15:antialias=true"
-thirdfont="TerminessTTF Nerd Font:size=14:antialias=true"
-#thirdfont="Ionicons:size=16:antialias=true"
+iconfont="Symbols Nerd Font:size=16:antialias=true"
+thirdfont="Symbols Nerd Font:size=16:antialias=true"
+#thirdfont="Ionicons:size=16:antialias=false"
 gap=$(awk -F"=" '/gap=/ {print $2}' ~/.config/bspwm/bspwmrc)
 main_menu="rofimenu"
 networkmenu="networkmenu.sh"
 wifi_indicator=true
 window_button="%{A:bspc node -c:} %{A}"
-#menu_icon=
-menu_icon=
-#
+menu_icon=
 charging_icon=
 battery_full_icon=
 battery_draining_icon=
@@ -211,7 +209,7 @@ i=1
 	# system tray
 	if [ "$systemtray" -eq 1 ]; then
 		# If there is no configuration, add one
-		[ -e ~/.stalonetrayrc ] || cp /usr/share/limepanel/stalonetrayrc ~/.stalonetrayrc
+		[ ~/.stalonetrayrc ] || cp /usr/share/limepanel/stalonetrayrc ~/.stalonetrayrc
 		# Set height to match the panel
 		sed -i "s/^icon_size .*/icon_size $PANEL_HEIGHT/" ~/.stalonetrayrc
 		sed -i "s/^max_geometry.*/max_geometry 0x$PANEL_HEIGHT/" ~/.stalonetrayrc
@@ -238,9 +236,9 @@ i=1
 		| lemonbar \
 		-d \
 		-g x$panel_height \
-		-f "$mainfont" \
-		-f "$iconfont" \
-		-f "$thirdfont" \
+		-f "$mainfont" -o 1\
+		-f "$iconfont" -o -2\
+		-f "$thirdfont" -o -3\
 		-F $COLOR_FOCUSED_DESKTOP_FG \
 		-B $COLOR_DESKTOP_BG \
 		-a 30 \
