@@ -8,8 +8,8 @@ if ! [ -f "$HOME/.limepanelrc" ]; then
 #ionicons         
 panel_height='25'
 mainfont='-*-terminus-medium-*-*-*-18-*-*-*-*-*-*-*'
-iconfont="Symbols Nerd Font:size=16:antialias=true"
-thirdfont="Symbols Nerd Font:size=16:antialias=true"
+iconfont="TerminessTTF Nerd Font:size=15:antialias=true"
+thirdfont="TerminessTTF Nerd Font:size=16:antialias=true"
 #thirdfont="Ionicons:size=16:antialias=false"
 gap=$(awk -F"=" '/gap=/ {print $2}' ~/.config/bspwm/bspwmrc)
 main_menu="rofimenu"
@@ -236,9 +236,9 @@ i=1
 		| lemonbar \
 		-d \
 		-g x$panel_height \
-		-f "$mainfont" -o 1\
+		-f "$mainfont" -o -3\
 		-f "$iconfont" -o -2\
-		-f "$thirdfont" -o -3\
+		-f "$thirdfont" -o 0\
 		-F $COLOR_FOCUSED_DESKTOP_FG \
 		-B $COLOR_DESKTOP_BG \
 		-a 30 \
