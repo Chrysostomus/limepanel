@@ -209,7 +209,7 @@ i=1
 	# system tray
 	if [ "$systemtray" -eq 1 ]; then
 		# If there is no configuration, add one
-		[ ~/.stalonetrayrc ] || cp /usr/share/limepanel/stalonetrayrc ~/.stalonetrayrc
+		[ -e ~/.stalonetrayrc ] || cp /usr/share/limepanel/stalonetrayrc ~/.stalonetrayrc
 		# Set height to match the panel
 		sed -i "s/^icon_size .*/icon_size $PANEL_HEIGHT/" ~/.stalonetrayrc
 		sed -i "s/^max_geometry.*/max_geometry 0x$PANEL_HEIGHT/" ~/.stalonetrayrc
