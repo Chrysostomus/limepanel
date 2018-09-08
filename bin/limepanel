@@ -229,6 +229,7 @@ i=1
 	# status
 	status > /tmp/panel-fifo$i &
 	# Volume-infos
+	autoalsaconf
 	volume_status.sh &
 	# Pipe all the info to lemonbar
 	cat $PANEL_FIFO$i \
